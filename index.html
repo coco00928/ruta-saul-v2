@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ruta Saul">
+<meta name="theme-color" content="#0a0f1e">
+<link rel="manifest" href="manifest.json">
+<title>Mi Ruta Estratégica · Saul</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --bg:#0a0f1e;--surface:#111827;--surface2:#1a2535;--surface3:#1e2d45;
+  --border:#1e2d45;--border2:#2a3f5f;
+  --green:#00e5a0;--green-d:#00e5a015;
+  --yellow:#f0b429;--yellow-d:#f0b42915;
+  --red:#ff4d6d;--red-d:#ff4d6d15;
+  --blue:#3d9cf0;--blue-d:#3d9cf015;
+  --purple:#a78bfa;--purple-d:#a78bfa15;
+  --orange:#f97316;--orange-d:#f9731615;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#94a3b8;
+  --mono:'SF Mono',SFMono-Regular,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden;}
+.app{display:flex;flex-direction:column;height:100%;max-width:560px;margin:0 auto;}
+.hdr{padding:max(14px,env(safe-area-inset-top)) 16px 10px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;}
+.hdr-row{display:flex;justify-content:space-between;align-items:center;}
+.hdr-logo{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:6px;}
+.hdr-sub{font-size:9px;color:var(--muted);margin-top:2px;}
+.hdr-cap{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green);text-align:right;}
+.hdr-cap-lbl{font-size:9px;color:var(--muted);text-align:right;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.scroll::-webkit-scrollbar{display:none;}
+.pad{padding:14px 16px 30px;}
+.nav{display:flex;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;padding-bottom:max(8px,env(safe-area-inset-bottom));}
+.nb{flex:1;padding:9px 2px 8px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-top:2px solid transparent;}
+.nb.on{border-top-color:var(--green);}
+.ni{font-size:17px;line-height:1;}
+.nl{font-size:9px;color:var(--muted);}
+.nb.on .nl{color:var(--green);font-weight:700;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+.card-tap{cursor:pointer;transition:opacity .15s;}
+.card-tap:active{opacity:.65;}
+.sec{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin:16px 0 10px;display:flex;align-items:center;gap:8px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--border);}
+.bdg{display:inline-block;font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.4px;white-space:nowrap;}
+.bg{background:var(--green-d);color:var(--green);}
+.br{background:var(--red-d);color:var(--red);}
+.by{background:var(--yellow-d);color:var(--yellow);}
+.bb{background:var(--blue-d);color:var(--blue);}
+.bp{background:var(--purple-d);color:var(--purple);}
+.bar-bg{height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin:5px 0 2px;}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.mt{background:var(--surface2);border-radius:10px;padding:10px;}
+.ml{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.mv{font-family:var(--mono);font-size:12px;font-weight:700;}
+.hero{background:linear-gradient(135deg,#0a1e36,#0d1420);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;text-align:center;}
+.hero-cap{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--green);letter-spacing:-1px;}
+.hero-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.hero-stats{display:flex;justify-content:center;gap:18px;margin-top:12px;}
+.hs{text-align:center;}
+.hs .v{font-family:var(--mono);font-size:17px;font-weight:700;}
+.hs .l{font-size:9px;color:var(--muted);margin-top:1px;}
+.hsdiv{width:1px;background:var(--border);}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:480px;}
+th{background:var(--surface2);color:var(--muted);font-weight:600;padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.inp{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:5px 7px;width:100%;font-size:11px;font-family:var(--mono);outline:none;min-width:60px;}
+.inp:focus{border-color:var(--green);}
+.inp-sm{min-width:50px;width:65px;}
+.inp-md{min-width:70px;width:85px;}
+.inp-lg{min-width:90px;width:110px;}
+.btn-add{width:100%;background:var(--green-d);border:1px dashed var(--green);color:var(--green);border-radius:10px;padding:11px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px;}
+.btn-add:active{opacity:.7;}
+.btn-del{background:transparent;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:3px 5px;}
+.modal{display:none;position:fixed;inset:0;background:#000c;z-index:200;align-items:flex-end;}
+.modal.open{display:flex;}
+.modal-inner{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 16px;width:100%;max-height:85vh;overflow-y:auto;padding-bottom:max(20px,env(safe-area-inset-bottom));}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{background:var(--surface2);border:none;color:var(--muted);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;}
+.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.inp-full{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 12px;color:var(--text);font-size:13px;outline:none;margin-bottom:14px;-webkit-appearance:none;}
+.inp-full:focus{border-color:var(--green);}
+select.inp-full{cursor:pointer;}
+.btn-save{width:100%;background:var(--green);border:none;color:#080c14;border-radius:10px;padding:13px;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-cancel{width:100%;background:transparent;border:none;color:var(--muted);padding:10px;font-size:13px;cursor:pointer;margin-top:6px;}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);color:var(--text);padding:10px 18px;border-radius:20px;font-size:12px;opacity:0;transition:all .3s;z-index:300;white-space:nowrap;border:1px solid var(--border2);pointer-events:none;}
+.live-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.live-bdg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--green);background:var(--green-d);padding:4px 10px;border-radius:20px;}
+.spin{animation:spin 1s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.upd-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:10px;cursor:pointer;}
+.sofi-card{background:var(--surface2);border-radius:12px;padding:13px;margin-bottom:8px;border:1px solid var(--border);}
+.radar-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;}
+.radar-card.zona{border-color:var(--green);}
+.ag-item{border-radius:12px;padding:12px 13px;margin-bottom:8px;border-left-width:3px;border-left-style:solid;}
+.noticia-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div>
+        <div class="hdr-logo"><span class="dot"></span>RUTA ESTRATÉGICA · SAUL</div>
+        <div class="hdr-sub" id="hdr-fecha"></div>
+      </div>
+      <div>
+        <div class="hdr-cap" id="hdr-total">—</div>
+        <div class="hdr-cap-lbl">capital total</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll"><div class="pad" id="main-pad"></div></div>
+  <div class="nav">
+    <button class="nb on" onclick="goTab('general')"><span class="ni">⚡</span><span class="nl">General</span></button>
+    <button class="nb" onclick="goTab('gbm')"><span class="ni">📈</span><span class="nl">GBM</span></button>
+    <button class="nb" onclick="goTab('divs')"><span class="ni">💰</span><span class="nl">Divs</span></button>
+    <button class="nb" onclick="goTab('radar')"><span class="ni">🎯</span><span class="nl">Radar</span></button>
+    <button class="nb" onclick="goTab('agenda')"><span class="ni">📅</span><span class="nl">Agenda</span></button>
+  </div>
+</div>
+<div class="modal" id="modal" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal-inner" id="modal-body"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// APP VERSION
+// ══════════════════════════════════════════
+const APP_VERSION = '2026.09.27-v5';
+
+// ══════════════════════════════════════════
+// DATOS BASE — Portafolio real Sep 2026
+// ══════════════════════════════════════════
+const DEF = {
+  pilares:[
+    {id:'gbm',   n:'GBM (Acciones y FIBRAs)', saldo:64919,   aporte:1800, c:'#3d9cf0', ic:'📈', tasa:null},
+    {id:'sofi',  n:'SOFIPOs',                  saldo:28175,   aporte:800,  c:'#00e5a0', ic:'🏦', tasa:null},
+    {id:'ytp',   n:'YoTePresto (P2P)',          saldo:15960,   aporte:800,  c:'#f0b429', ic:'🤝', tasa:18.71},
+    {id:'fins',  n:'Finsus',                    saldo:4583,    aporte:400,  c:'#a78bfa', ic:'💜', tasa:10.0},
+    {id:'bitso', n:'Cripto (Bitso)',             saldo:5640,    aporte:200,  c:'#f97316', ic:'₿',  tasa:null},
+  ],
+  poderCompra:{efectivo:29.14, aporteSemanal:450, incluirAporte:true},
+  tipoCambio: 19.50,
+  ultimaActGlobal: null,
+  apiKey: 'd523898a75b84774b39755dff3e01a94',
+
+  // ── SOFIPOs ──
+  sofipos:[
+    {id:'nu',   n:'Nu Cajita Turbo', saldo:25290.51, tasa:13.00, meta:25000, c:'#a855f7', ic:'🟣', nota:'Topada $25K ✅'},
+    {id:'didi', n:'DiDi Cuenta',     saldo:2884.54,  tasa:15.00, meta:10000, c:'#00e5a0', ic:'🟢', nota:'Meta: $10K'},
+  ],
+
+  // ── YoTePresto ──
+  ytp:{
+    saldo: 15960,
+    tasa: 18.71,
+    autoinvest: true,
+    aporte: 800,
+    // Pagos mensuales estimados = saldo * tasa / 12
+  },
+
+  // ── Finsus ── (inversiones escalonadas tipo CETE)
+  finsus:{
+    aportaciones:[
+      {fecha:'2025-01-15', monto:500,  tasa:10.5, vence:'2025-07-15'},
+      {fecha:'2025-03-10', monto:800,  tasa:10.2, vence:'2025-09-10'},
+      {fecha:'2025-06-01', monto:1000, tasa:10.0, vence:'2025-12-01'},
+      {fecha:'2025-09-15', monto:1283, tasa:9.8,  vence:'2026-03-15'},
+      {fecha:'2026-01-10', monto:1000, tasa:9.5,  vence:'2026-07-10'},
+    ],
+  },
+
+  // ── Cripto ──
+  cripto:[
+    {t:'BTC', n:'Bitcoin', cant:0.00325665, pm:4336.62, costo:1480300, c:'#f97316', ic:'₿', cambio24h:4.49, historial:[3800,3900,4000,4100,4200,4250,4336]},
+    {t:'XRP', n:'XRP',     cant:47.158854, pm:1303.68,  costo:917.40,  c:'#346aa9', ic:'✕', cambio24h:26.78, historial:[800,900,950,1000,1100,1200,1303]},
+  ],
+
+  // ── GBM acciones ──
+  gbm:[
+    {t:'AMZN',    n:'Amazon',          g:'Global', tits:3,   pp:3783.81, pm:4317.25, st:'mantener', td:'AMZN'},
+    {t:'MSFT',    n:'Microsoft',       g:'Global', tits:1,   pp:6650.00, pm:8554.92, st:'mantener', td:'MSFT'},
+    {t:'NFLX',    n:'Netflix',         g:'Global', tits:5,   pp:1561.75, pm:1294.37, st:'vigilar',  td:'NFLX'},
+    {t:'NU',      n:'Nu Holdings',     g:'Global', tits:5,   pp:226.90,  pm:237.87,  st:'acumular', td:'NU'},
+    {t:'WALMEX',  n:'Walmart México',  g:'México', tits:228, pp:53.83,   pm:46.20,   st:'acumular', td:'WALMEX:BMV'},
+    {t:'FEMSA',   n:'FEMSA',           g:'México', tits:28,  pp:172.73,  pm:206.10,  st:'mantener', td:'FEMSAUBD:BMV'},
+    {t:'KOF',     n:'Coca-Cola FEMSA', g:'México', tits:10,  pp:151.68,  pm:192.89,  st:'mantener', td:'KOFUBL:BMV'},
+    {t:'BBAJIO',  n:'Banco del Bajío', g:'México', tits:46,  pp:43.58,   pm:57.12,   st:'mantener', td:'BBAJIO-O:BMV'},
+    {t:'HERDEZ',  n:'Grupo Herdez',    g:'México', tits:28,  pp:70.03,   pm:53.05,   st:'vigilar',  td:'HERDEZ:BMV'},
+    {t:'ALSEA',   n:'Alsea',           g:'México', tits:115, pp:46.50,   pm:43.15,   st:'acumular', td:'ALSEA:BMV'},
+    {t:'GENIUS21',n:'Quanta Shares',   g:'México', tits:1,   pp:89.02,   pm:97.58,   st:'mantener', td:''},
+    {t:'GFNORTE', n:'GF Banorte',      g:'México', tits:6,   pp:170.45,  pm:196.04,  st:'mantener', td:'GFNORTEO:BMV'},
+    {t:'FNOVA17', n:'Fibra Nova',      g:'FIBRA',  tits:10,  pp:21.00,   pm:39.98,   st:'estrella', td:'FNOVA17:BMV'},
+    {t:'FUNO11',  n:'Fibra Uno',       g:'FIBRA',  tits:22,  pp:20.88,   pm:29.77,   st:'mantener', td:'FUNO11:BMV'},
+    {t:'DANHOS',  n:'Fibra Danhos',    g:'FIBRA',  tits:105, pp:24.18,   pm:29.23,   st:'mantener', td:'DANHOS13:BMV'},
+    {t:'FMTY14',  n:'Fibra MTY',       g:'FIBRA',  tits:51,  pp:14.28,   pm:14.09,   st:'mantener', td:'FMTY14:BMV'},
+    {t:'FMX23',   n:'Fibra Infra',     g:'FIBRA',  tits:70,  pp:28.00,   pm:34.03,   st:'mantener', td:'FMX23:BMV'},
+  ],
+
+  // ── Radar ──
+  radar:[
+    {t:'GOOGL', n:'Google (Alphabet)', precio:178, zMin:160, zMax:175, obj:220, pot:24, mon:'USD', yt:'GOOGL'},
+    {t:'NVDA',  n:'NVIDIA',            precio:116, zMin:95,  zMax:110, obj:160, pot:38, mon:'USD', yt:'NVDA'},
+    {t:'AAPL',  n:'Apple',             precio:222, zMin:195, zMax:210, obj:260, pot:17, mon:'USD', yt:'AAPL'},
+    {t:'META',  n:'Meta Platforms',    precio:560, zMin:490, zMax:530, obj:680, pot:21, mon:'USD', yt:'META'},
+    {t:'PLTR',  n:'Palantir',          precio:80,  zMin:65,  zMax:75,  obj:120, pot:50, mon:'USD', yt:'PLTR'},
+    {t:'AMD',   n:'AMD',               precio:145, zMin:120, zMax:135, obj:180, pot:24, mon:'USD', yt:'AMD'},
+    {t:'PEP',   n:'PepsiCo',           precio:155, zMin:140, zMax:150, obj:180, pot:16, mon:'USD', yt:'PEP'},
+    {t:'SOXL',  n:'Direxion Semi 3x',  precio:28,  zMin:22,  zMax:26,  obj:45,  pot:61, mon:'USD', yt:'SOXL'},
+  ],
+
+  // ── Dividendos ──
+  avisos:[
+    {activo:'WALMEX', exDiv:'2026-11-05', pago:'2026-11-18', monto:0.58, tits:228},
+    {activo:'WALMEX', exDiv:'2026-12-01', pago:'2026-12-09', monto:0.58, tits:228},
+    {activo:'MSFT',   exDiv:'2026-11-20', pago:'2026-12-11', monto:0.83, tits:1},
+    {activo:'KOF',    exDiv:'2026-10-10', pago:'2026-10-20', monto:1.93, tits:10},
+  ],
+  cobros:[
+    {mes:'Ene 25',activo:'FMTY',    bruto:18.42,  isr:2.69},
+    {mes:'Feb 25',activo:'FUNO',    bruto:12.12,  isr:0.397},
+    {mes:'Feb 25',activo:'FNOVA17', bruto:33.60,  isr:0},
+    {mes:'Feb 25',activo:'FMTY',    bruto:21.93,  isr:0},
+    {mes:'Mar 25',activo:'FMTY',    bruto:25.19,  isr:3.19},
+    {mes:'Mar 25',activo:'FCFE',    bruto:50.25,  isr:0},
+    {mes:'Abr 25',activo:'FNOVA17', bruto:36.01,  isr:0},
+    {mes:'Abr 25',activo:'FMTY',    bruto:28.35,  isr:0},
+    {mes:'May 25',activo:'BBAJIO',  bruto:96.56,  isr:9.65},
+    {mes:'May 25',activo:'FUNO',    bruto:12.20,  isr:0},
+    {mes:'May 25',activo:'FMTY',    bruto:29.48,  isr:0},
+    {mes:'Jun 25',activo:'FIBRAMQ', bruto:61.25,  isr:18.37},
+    {mes:'Jul 25',activo:'PEPSI',   bruto:33.28,  isr:3.72},
+    {mes:'Jul 25',activo:'FMTY',    bruto:0.15,   isr:0},
+    {mes:'Jul 25',activo:'FNOVA17', bruto:44.37,  isr:0},
+    {mes:'Ago 25',activo:'FUNO',    bruto:12.55,  isr:3.76},
+    {mes:'Ago 25',activo:'DANHOS',  bruto:47.24,  isr:8.54},
+    {mes:'Ago 25',activo:'FUNO',    bruto:12.54,  isr:3.76},
+    {mes:'Sep 25',activo:'FMTY',    bruto:0.086,  isr:0.005},
+    {mes:'Sep 25',activo:'BBAJIO',  bruto:103.29, isr:10.32},
+    {mes:'Sep 25',activo:'UNH',     bruto:28.51,  isr:2.85},
+    {mes:'Sep 25',activo:'FIBRAMQ', bruto:77.78,  isr:23.33},
+    {mes:'Sep 25',activo:'FMTY',    bruto:0.085,  isr:0.005},
+    {mes:'Oct 25',activo:'ALSEA',   bruto:8.54,   isr:0},
+    {mes:'Oct 25',activo:'KOF',     bruto:18.40,  isr:1.84},
+    {mes:'Oct 25',activo:'FEMSA',   bruto:63.17,  isr:6.31},
+    {mes:'Oct 25',activo:'FEMSA',   bruto:28.64,  isr:2.86},
+    {mes:'Oct 25',activo:'FMTY',    bruto:0.083,  isr:0.015},
+    {mes:'Nov 25',activo:'FUNO',    bruto:13.31,  isr:3.99},
+    {mes:'Nov 25',activo:'FNOVA17', bruto:46.14,  isr:0},
+    {mes:'Nov 25',activo:'DANHOS',  bruto:47.24,  isr:7.93},
+    {mes:'Nov 25',activo:'WALMEX',  bruto:49.56,  isr:4.95},
+    {mes:'Nov 25',activo:'FMTY',    bruto:0.083,  isr:0.015},
+    {mes:'Dic 25',activo:'BBAJIO',  bruto:41.31,  isr:4.13},
+    {mes:'Dic 25',activo:'GFNORTE', bruto:20.97,  isr:2.09},
+    {mes:'Dic 25',activo:'KOF',     bruto:18.39,  isr:1.57},
+    {mes:'Dic 25',activo:'WALMEX',  bruto:50.15,  isr:5.01},
+    {mes:'Dic 25',activo:'FMTY',    bruto:0.083,  isr:0.015},
+    {mes:'Ene 26',activo:'FEMSA',   bruto:99.16,  isr:9.91},
+    {mes:'Ene 26',activo:'FMTY',    bruto:1.63,   isr:0.48},
+    {mes:'Ene 26',activo:'FIBRAMQ', bruto:126.78, isr:1.63},
+    {mes:'Feb 26',activo:'FUNO',    bruto:14.73,  isr:0},
+    {mes:'Feb 26',activo:'FNOVA17', bruto:6.13,   isr:0},
+    {mes:'Feb 26',activo:'FMTY',    bruto:1.87,   isr:0.56},
+    {mes:'Feb 26',activo:'FMX',     bruto:0.81,   isr:0},
+    {mes:'Mar 26',activo:'FMTY',    bruto:5.58,   isr:0.33},
+    {mes:'Mar 26',activo:'DANHOS',  bruto:47.24,  isr:9.34},
+    {mes:'Mar 26',activo:'FMX',     bruto:4.15,   isr:0},
+    {mes:'Abr 26',activo:'HERDEZ',  bruto:45.00,  isr:4.50},
+    {mes:'Abr 26',activo:'KOF',     bruto:19.35,  isr:1.93},
+    {mes:'Abr 26',activo:'FEMSA',   bruto:89.68,  isr:8.96},
+    {mes:'Abr 26',activo:'FNOVA17', bruto:6.21,   isr:0},
+    {mes:'Abr 26',activo:'FMX',     bruto:8.81,   isr:0},
+    {mes:'May 26',activo:'ALSEA',   bruto:40.00,  isr:4.00},
+    {mes:'May 26',activo:'FUNO',    bruto:13.64,  isr:4.09},
+    {mes:'May 26',activo:'BBAJIO',  bruto:87.72,  isr:8.77},
+    {mes:'May 26',activo:'HERDEZ',  bruto:17.25,  isr:1.72},
+    {mes:'May 26',activo:'DANHOS',  bruto:47.24,  isr:7.32},
+    {mes:'May 26',activo:'FMX',     bruto:8.81,   isr:0},
+    {mes:'May 26',activo:'GFNORTE', bruto:62.69,  isr:6.26},
+    {mes:'Jun 26',activo:'FMX',     bruto:12.34,  isr:0},
+    {mes:'Jun 26',activo:'FMTY',    bruto:4.58,   isr:0},
+    {mes:'Jul 26',activo:'KOF',     bruto:19.35,  isr:1.93},
+    {mes:'Jul 26',activo:'FEMSA',   bruto:89.67,  isr:8.96},
+    {mes:'Ago 26',activo:'FUNO',    bruto:14.07,  isr:4.22},
+    {mes:'Ago 26',activo:'DANHOS',  bruto:47.25,  isr:8.60},
+    {mes:'Ago 26',activo:'FMX',     bruto:12.34,  isr:0},
+    {mes:'Ago 26',activo:'FMTY',    bruto:3.64,   isr:0},
+  ],
+  frases:[
+    "El éxito financiero no se trata de adivinar el futuro, sino de la disciplina constante con la que construyes tu presente.",
+    "El interés compuesto es la octava maravilla del mundo. Quien lo entiende, lo gana. Quien no, lo paga. — Einstein",
+    "No necesitas ser brillante, solo necesitas ser más racional que el promedio, la mayoría de las veces. — Buffett",
+    "El riesgo viene de no saber lo que estás haciendo. — Warren Buffett",
+    "Cada peso que inviertes hoy es un soldado que trabaja para ti mientras duermes.",
+    "La paciencia es amarga, pero su fruto es dulce. — Aristóteles",
+    "Los mercados pueden mantenerse irracionales más tiempo del que tú puedes mantenerte solvente — por eso diversificas.",
+    "No es cuánto dinero ganas, sino cuánto dinero conservas, cómo trabaja para ti. — Kiyosaki",
+    "El mejor momento para plantar un árbol fue hace 20 años. El segundo mejor momento es ahora.",
+    "Invertir con éxito requiere tiempo, disciplina y paciencia. — Buffett",
+    "La constancia vence al talento cuando el talento no es constante.",
+    "Tu yo del futuro te va a agradecer cada aportación que hagas hoy.",
+    "El mercado es un mecanismo para transferir dinero del impaciente al paciente. — Buffett",
+    "Una inversión en conocimiento paga el mejor interés. — Benjamin Franklin",
+    "El precio es lo que pagas. El valor es lo que recibes. — Warren Buffett",
+    "Construir patrimonio es un maratón, no una carrera de velocidad. Sigue corriendo.",
+    "La regla número 1: nunca pierdas dinero. La regla número 2: nunca olvides la regla 1. — Buffett",
+    "Diversificar es protegerte de tu propia ignorancia sobre lo que va a pasar.",
+    "Cada semana que aportas, te acercas un paso más a tu libertad financiera.",
+    "Los grandes patrimonios se construyen en silencio, aportación tras aportación, año tras año.",
+    "La volatilidad no es riesgo. El riesgo real es no entender en qué estás invirtiendo.",
+    "No te compares con otros inversionistas. Compárate con tu yo de hace un año.",
+    "La libertad financiera no es un destino, es la consecuencia de hábitos sostenidos en el tiempo.",
+    "Sigue aportando aunque el mercado esté rojo. Especialmente cuando está rojo.",
+    "Tu portafolio refleja tus decisiones, no tu suerte. Decide bien, consistentemente.",
+    "Warren Buffett pasó 99% de su riqueza después de los 50 años. La paciencia siempre gana.",
+    "El dinero que no se mueve, se devalúa. El dinero que trabaja, se multiplica.",
+    "Cuando todos temen, el inversionista valiente compra. Cuando todos compran con euforia, el sabio vende.",
+    "Las acciones que posees representan partes de negocios reales. Piensa como dueño, no como especulador.",
+    "La diferencia entre rico y pobre no es el ingreso, es el hábito de inversión sostenido en el tiempo.",
+  ],
+  agenda:[
+    {u:'alta',  f:'Oct 2026',    ic:'📊', t:'Reporte Q3 WALMEX',         d:'Ver resultados ventas mismas tiendas y confirmar dividendo Nov'},
+    {u:'alta',  f:'18 Oct 2026', ic:'💰', t:'Dividendo KOF',              d:'$19.30 estimado (10 acc x $1.93)'},
+    {u:'media', f:'18 Nov 2026', ic:'💰', t:'Dividendo WALMEX',           d:'$132.24 estimado (228 acc x $0.58)'},
+    {u:'media', f:'9 Dic 2026',  ic:'💰', t:'Dividendo WALMEX 2da exhib', d:'Segunda exhibición semestral'},
+    {u:'media', f:'Nov 2026',    ic:'🗂', t:'Auditoría trimestral',       d:'Revisión completa 5 pilares — planear 2027'},
+    {u:'baja',  f:'Dic 2026',    ic:'🎯', t:'Meta 2026: $140K total',     d:'Revisar progreso hacia meta anual'},
+    {u:'baja',  f:'Continuo',    ic:'🔵', t:'GOOGL zona $160–175 USD',    d:'Esperar corrección para entrar'},
+    {u:'baja',  f:'Continuo',    ic:'🔵', t:'NVDA zona $95–110 USD',      d:'Esperar corrección 15-20%'},
+    {u:'baja',  f:'Continuo',    ic:'🔵', t:'HERDEZ — esperar rebote',    d:'Posición en -24%. Esperar $58+ para evaluar salida'},
+    {u:'baja',  f:'Continuo',    ic:'🔵', t:'ALSEA — seguir acumulando',  d:'A -7% sigue en zona de acumulación'},
+    {u:'baja',  f:'Continuo',    ic:'🔵', t:'WALMEX — seguir acumulando', d:'Reporte Q3 puede ser catalizador'},
+  ],
+};
+
+// ══════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════
+function cargar(){
+  try{
+    const s=localStorage.getItem('ruta_saul_v5');
+    return s?JSON.parse(s):JSON.parse(JSON.stringify(DEF));
+  }catch(e){ return JSON.parse(JSON.stringify(DEF)); }
+}
+function guardar(){ try{ localStorage.setItem('ruta_saul_v5',JSON.stringify(D)); }catch(e){} }
+let D = cargar();
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+const fmt = n => '$'+Math.abs(n).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtK = n => {
+  const a=Math.abs(n);
+  if(a>=1000) return (n<0?'-':'')+'$'+(a/1000).toLocaleString('es-MX',{minimumFractionDigits:1,maximumFractionDigits:1})+'K';
+  return fmt(n);
+};
+const pct = n => (n>=0?'+':'')+n.toFixed(2)+'%';
+const gc = n => n>=0?'var(--green)':'var(--red)';
+
+const sCfg={
+  comprar:{l:'COMPRAR',   cls:'bg'},
+  acumular:{l:'ACUMULAR',  cls:'bg'},
+  estrella:{l:'⭐ ESTRELLA',cls:'by'},
+  mantener:{l:'MANTENER',  cls:'bb'},
+  vigilar:{l:'VIGILAR',   cls:'by'},
+  vender:{l:'VENDER ⚠',  cls:'br'},
+};
+const gLbl={Global:'🌎 Global',México:'🇲🇽 México',FIBRA:'🏢 FIBRA'};
+
+function totalGBM(){ return D.gbm.reduce((s,a)=>s+(a.tits*a.pm),0); }
+function totalCripto(){ return D.cripto.reduce((s,c)=>s+c.pm,0); }
+function totalSofipos(){ return D.sofipos.reduce((s,x)=>s+x.saldo,0); }
+function totalFinsus(){ return D.finsus.aportaciones.reduce((s,a)=>s+a.monto,0); }
+
+function totalPilares(){
+  const gbmV=totalGBM(), criptoV=totalCripto(), sofiV=totalSofipos(), finsV=totalFinsus();
+  return D.pilares.reduce((s,p)=>{
+    if(p.id==='gbm')   return s+gbmV;
+    if(p.id==='bitso') return s+criptoV;
+    if(p.id==='sofi')  return s+sofiV;
+    if(p.id==='fins')  return s+finsV;
+    return s+p.saldo;
+  },0);
+}
+
+function poderDeCompra(){
+  const base=D.poderCompra.efectivo;
+  return D.poderCompra.incluirAporte?base+D.poderCompra.aporteSemanal:base;
+}
+
+function fraseDeLaSemana(){
+  const diff=new Date()-new Date(new Date().getFullYear(),0,1);
+  const semana=Math.floor(diff/(7*24*60*60*1000));
+  return D.frases[semana%D.frases.length];
+}
+
+function sparkline(data,color,w=70,h=24){
+  if(!data||data.length<2) return '';
+  const min=Math.min(...data),max=Math.max(...data),range=max-min||1;
+  const pts=data.map((v,i)=>{
+    return `${((i/(data.length-1))*w).toFixed(1)},${(h-((v-min)/range)*h).toFixed(1)}`;
+  }).join(' ');
+  return `<svg width="${w}" height="${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+// ══════════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════════
+let tab='general', actualizando=false;
+
+function goTab(t){
+  tab=t;
+  document.querySelectorAll('.nb').forEach((b,i)=>{
+    b.classList.toggle('on',['general','gbm','divs','radar','agenda'][i]===t);
+  });
+  renderTab();
+  document.getElementById('main-pad').parentElement.scrollTop=0;
+}
+
+function renderTab(){
+  const total=totalPilares();
+  document.getElementById('hdr-total').textContent=fmtK(total);
+  const now=new Date();
+  document.getElementById('hdr-fecha').textContent=
+    now.toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'})+' · v'+APP_VERSION.slice(5,10);
+  const map={general:tplGeneral,gbm:tplGBM,divs:tplDivs,radar:tplRadar,agenda:tplAgenda};
+  document.getElementById('main-pad').innerHTML=map[tab]();
+  if(tab==='gbm') document.getElementById('upd-btn')?.addEventListener('click',actualizarPrecios);
+}
+
+// ══════════════════════════════════════════
+// PRECIOS EN TIEMPO REAL
+// ══════════════════════════════════════════
+async function actualizarPrecios(){
+  if(actualizando) return;
+  actualizando=true;
+  const ic=document.getElementById('live-ic');
+  const btn=document.getElementById('upd-btn');
+  if(ic) ic.className='spin';
+  if(btn) btn.textContent='Actualizando...';
+
+  const symsGBM=D.gbm.map(a=>a.td).filter(Boolean).join(',');
+  const symsRadar=D.radar.filter(r=>r.yt).map(r=>r.yt).join(',');
+  const symsCripto='BTC/MXN,XRP/MXN,USD/MXN';
+  const allSyms=[symsGBM,symsRadar,symsCripto].filter(Boolean).join(',');
+
+  const url=`https://api.twelvedata.com/price?symbol=${encodeURIComponent(allSyms)}&apikey=${D.apiKey}`;
+  let updated=0;
+
+  try{
+    const r=await fetch(url,{signal:AbortSignal.timeout(12000)});
+    const j=await r.json();
+    // Respuesta: {SYMBOL:{price:"..."}} o plana si un solo símbolo
+    const getPrice=(sym)=>{
+      if(j[sym]&&j[sym].price) return parseFloat(j[sym].price);
+      if(j.price&&allSyms===sym) return parseFloat(j.price);
+      return null;
+    };
+    // Tipo de cambio
+    const tc=getPrice('USD/MXN');
+    if(tc) D.tipoCambio=tc;
+    // GBM stocks
+    D.gbm.forEach(a=>{
+      if(!a.td) return;
+      const p=getPrice(a.td);
+      if(p){ a.pm=parseFloat(p.toFixed(2)); a.ultAct=new Date().toISOString(); updated++; }
+    });
+    // Radar (en USD → los almacenamos en USD)
+    D.radar.forEach(r=>{
+      if(!r.yt) return;
+      const p=getPrice(r.yt);
+      if(p){ r.precio=parseFloat(p.toFixed(2)); updated++; }
+    });
+    // Cripto
+    const btcMXN=getPrice('BTC/MXN');
+    const xrpMXN=getPrice('XRP/MXN');
+    if(btcMXN){ D.cripto[0].pm=parseFloat(btcMXN.toFixed(2)); updated++; }
+    if(xrpMXN){ D.cripto[1].pm=parseFloat(xrpMXN.toFixed(2)); updated++; }
+
+    D.ultimaActGlobal=new Date().toISOString();
+    guardar(); renderTab();
+    toast(updated>0?`✓ ${updated} precios actualizados`:'Sin precios nuevos');
+  }catch(e){
+    toast('⚠️ Sin conexión — verifica precios manualmente en GBM');
+  }
+  actualizando=false;
+}
+
+// ══════════════════════════════════════════
+// TAB GENERAL
+// ══════════════════════════════════════════
+function tplGeneral(){
+  const total=totalPilares();
+  const gbmV=totalGBM(), criptoV=totalCripto(), sofiV=totalSofipos(), finsV=totalFinsus();
+  const totalAporte=D.pilares.reduce((s,p)=>s+p.aporte,0);
+  const verde=D.gbm.filter(a=>a.pm>=a.pp).length;
+  const rojo=D.gbm.filter(a=>a.pm<a.pp).length;
+
+  const pilaresH=D.pilares.map(p=>{
+    const val=p.id==='gbm'?gbmV:p.id==='bitso'?criptoV:p.id==='sofi'?sofiV:p.id==='fins'?finsV:p.saldo;
+    const pp=(val/total*100).toFixed(1);
+    const tasaH=p.tasa?`<span style="color:var(--green);font-weight:700"> · ${p.tasa}% anual</span>`:'';
+    return `<div class="card card-tap" onclick="editPilar('${p.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:9px">
+          <div style="width:36px;height:36px;border-radius:9px;background:${p.c}18;display:flex;align-items:center;justify-content:center;font-size:17px">${p.ic}</div>
+          <div><div style="font-weight:600;font-size:13px">${p.n}</div><div style="font-size:10px;color:var(--muted)">${fmt(p.aporte)}/mes${tasaH}</div></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700">${fmt(val)}</div>
+          <div style="font-size:9px;color:var(--muted)">${pp}%</div>
+        </div>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pp}%;background:${p.c}"></div></div>
+    </div>`;
+  }).join('');
+
+  // SOFIPOs resumen
+  const intMesSofi=D.sofipos.reduce((s,x)=>s+(x.saldo*x.tasa/100/12),0);
+  const intAnoSofi=D.sofipos.reduce((s,x)=>s+(x.saldo*x.tasa/100),0);
+  const tasaPromSofi=sofiV>0?D.sofipos.reduce((s,x)=>s+(x.tasa*x.saldo),0)/sofiV:0;
+
+  const sofiH=D.sofipos.map(s=>{
+    const pp=Math.min(100,(s.saldo/s.meta*100)).toFixed(1);
+    const falta=Math.max(0,s.meta-s.saldo);
+    const iMes=s.saldo*s.tasa/100/12;
+    const iAno=s.saldo*s.tasa/100;
+    const enMeta=s.saldo>=s.meta;
+    return `<div class="sofi-card" style="border-color:${enMeta?s.c+'50':'var(--border)'};cursor:pointer" onclick="editSofipo('${s.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span style="font-size:17px">${s.ic}</span>
+          <div><div style="font-weight:700;font-size:13px">${s.n}</div>
+          <div style="font-size:10px;color:var(--muted)">${s.nota}</div></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:${s.c}">${fmt(s.saldo)}</div>
+          <div style="font-size:10px;color:var(--muted)">Tasa: <span style="color:var(--green);font-weight:700">${s.tasa}% anual</span></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:4px">
+        <span>Meta: ${fmt(s.meta)}</span>
+        <span>${enMeta?'✅ Topada':'Falta: '+fmt(falta)}</span>
+      </div>
+      <div class="bar-bg" style="height:5px"><div class="bar-fill" style="width:${pp}%;background:${s.c}"></div></div>
+      <div class="g2" style="margin-top:8px">
+        <div style="background:var(--surface);border-radius:8px;padding:7px 10px;text-align:center">
+          <div style="font-size:8px;color:var(--muted);margin-bottom:2px">INTERÉS/MES</div>
+          <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">${fmt(iMes)}</div>
+        </div>
+        <div style="background:var(--surface);border-radius:8px;padding:7px 10px;text-align:center">
+          <div style="font-size:8px;color:var(--muted);margin-bottom:2px">INTERÉS/AÑO</div>
+          <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">${fmt(iAno)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // YoTePresto
+  const ytpIntMes=D.ytp.saldo*D.ytp.tasa/100/12;
+  const ytpIntAno=D.ytp.saldo*D.ytp.tasa/100;
+
+  // Finsus
+  const finsTotal=totalFinsus();
+  const finsTasa=D.finsus.aportaciones.length>0?
+    D.finsus.aportaciones.reduce((s,a)=>s+(a.tasa*a.monto),0)/finsTotal:0;
+  const finsIntMes=finsTotal*finsTasa/100/12;
+
+  // Cripto cards
+  const criptoH=D.cripto.map((c,i)=>{
+    const ganTotal=c.pm-c.costo/1e6*c.pm; // simplificado
+    const ganPct=((c.pm-c.costo*c.cant/c.pm)/c.pm)*100; // aproximado
+    const realGan=c.pm-c.costo; // valor actual vs costo total
+    const ganReal=((c.pm/(c.costo||1))-1)*100;
+    const subiendo=c.cambio24h>=0;
+    const spark=sparkline(c.historial,c.color);
+    return `<div class="sofi-card" style="cursor:pointer" onclick="editCripto(${i})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:30px;height:30px;border-radius:50%;background:${c.c}20;display:flex;align-items:center;justify-content:center;font-size:14px;color:${c.c};font-weight:700">${c.ic}</div>
+          <div>
+            <div style="font-weight:700;font-size:13px">${c.t}</div>
+            <div style="font-size:10px;color:var(--muted)">${c.cant} ${c.t}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${spark}
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700">${fmt(c.pm)}</div>
+            <div style="font-size:10px;color:${subiendo?'var(--green)':'var(--red)'};font-weight:600">${subiendo?'▲':'▼'} ${Math.abs(c.cambio24h).toFixed(2)}% 24h</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="hero">
+    <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Capital Total Invertido</div>
+    <div class="hero-cap">${fmt(total)}</div>
+    <div class="hero-sub">${fmt(totalAporte)}/mes · ${D.gbm.length} posiciones GBM</div>
+    <div class="hero-stats">
+      <div class="hs"><div class="v" style="color:var(--green)">${verde}</div><div class="l">En verde</div></div>
+      <div class="hsdiv"></div>
+      <div class="hs"><div class="v" style="color:var(--red)">${rojo}</div><div class="l">En rojo</div></div>
+      <div class="hsdiv"></div>
+      <div class="hs"><div class="v" style="color:var(--yellow)">5</div><div class="l">Pilares</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,#1a1530,#0d1420);border-color:#a78bfa30;padding:14px">
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:18px">💭</span>
+      <div>
+        <div style="font-size:8px;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Frase de la semana</div>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.6;font-style:italic">"${fraseDeLaSemana()}"</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">Distribución de Pilares <span style="font-size:8px;color:var(--muted)">(toca para editar)</span></div>
+  ${pilaresH}
+
+  <div class="sec">🏦 SOFIPOs — Desglose</div>
+  <div class="card" style="padding:13px;margin-bottom:6px">
+    <div class="g3" style="margin-bottom:12px">
+      <div class="mt"><div class="ml">Total</div><div class="mv" style="color:var(--green)">${fmt(sofiV)}</div></div>
+      <div class="mt"><div class="ml">Tasa prom</div><div class="mv" style="color:var(--yellow)">${tasaPromSofi.toFixed(1)}%</div></div>
+      <div class="mt"><div class="ml">Interés/mes</div><div class="mv" style="color:var(--green)">${fmt(intMesSofi)}</div></div>
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-bottom:10px;text-align:center">Interés anual estimado: <span style="color:var(--green);font-weight:700">${fmt(intAnoSofi)}</span></div>
+    ${sofiH}
+    <button class="btn-add" onclick="addSofipo()">+ Agregar cuenta SOFIPO</button>
+  </div>
+
+  <div class="sec">🤝 YoTePresto (P2P) <span style="font-size:8px;color:var(--muted)">(toca para editar)</span></div>
+  <div class="sofi-card card-tap" onclick="editYTP()" style="cursor:pointer">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-weight:700;font-size:13px">YoTePresto Autoinvest</div>
+        <div style="font-size:10px;color:var(--muted)">Tasa promedio: <span style="color:var(--green);font-weight:700">${D.ytp.tasa}% anual</span></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--yellow)">${fmt(D.ytp.saldo)}</div>
+    </div>
+    <div class="g2">
+      <div style="background:var(--surface);border-radius:8px;padding:7px 10px;text-align:center">
+        <div style="font-size:8px;color:var(--muted);margin-bottom:2px">INTERÉS/MES EST.</div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">${fmt(ytpIntMes)}</div>
+      </div>
+      <div style="background:var(--surface);border-radius:8px;padding:7px 10px;text-align:center">
+        <div style="font-size:8px;color:var(--muted);margin-bottom:2px">INTERÉS/AÑO EST.</div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">${fmt(ytpIntAno)}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">💜 Finsus — Inversiones escalonadas <span style="font-size:8px;color:var(--muted)">(toca para editar)</span></div>
+  <div class="sofi-card card-tap" onclick="editFinsus()" style="cursor:pointer">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div>
+        <div style="font-weight:700;font-size:13px">Finsus CETE-like</div>
+        <div style="font-size:10px;color:var(--muted)">Tasa prom: <span style="color:var(--green);font-weight:700">${finsTasa.toFixed(2)}% anual</span> · ${D.finsus.aportaciones.length} inversiones</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--purple)">${fmt(finsTotal)}</div>
+    </div>
+    <div class="g2">
+      <div style="background:var(--surface);border-radius:8px;padding:7px 10px;text-align:center">
+        <div style="font-size:8px;color:var(--muted);margin-bottom:2px">INTERÉS/MES EST.</div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">${fmt(finsIntMes)}</div>
+      </div>
+      <div style="background:var(--surface);border-radius:8px;padding:7px 10px;text-align:center">
+        <div style="font-size:8px;color:var(--muted);margin-bottom:2px">INTERÉS/AÑO EST.</div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">${fmt(finsTotal*finsTasa/100)}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:9px;color:var(--muted)">Última inversión: ${D.finsus.aportaciones.length>0?D.finsus.aportaciones[D.finsus.aportaciones.length-1].fecha:'—'}</div>
+  </div>
+
+  <div class="sec">₿ Cripto Bitso — Desglose <span style="font-size:8px;color:var(--muted)">(toca para editar)</span></div>
+  <div class="card" style="padding:13px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:10px;color:var(--muted)">Total Cripto</div>
+        <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--orange)">${fmt(criptoV)}</div>
+      </div>
+      <button class="upd-btn" onclick="actualizarPrecios()" style="color:var(--orange)">⟳ Actualizar cripto</button>
+    </div>
+    ${criptoH}
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// TAB GBM
+// ══════════════════════════════════════════
+function tplGBM(){
+  let tComp=0,tMkt=0;
+  D.gbm.forEach(a=>{tComp+=a.tits*a.pp;tMkt+=a.tits*a.pm;});
+  const tPlus=tMkt-tComp,tPlusPct=tComp>0?(tPlus/tComp*100):0;
+  const pc=D.poderCompra,totalPC=poderDeCompra();
+
+  const ultAct=D.ultimaActGlobal;
+  let ultTxt='Nunca actualizado',ultColor='var(--red)';
+  if(ultAct){
+    const mins=Math.floor((Date.now()-new Date(ultAct))/60000);
+    if(mins<1){ultTxt='Actualizado ahora';ultColor='var(--green)';}
+    else if(mins<60){ultTxt=`Actualizado hace ${mins} min`;ultColor='var(--green)';}
+    else if(mins<1440){ultTxt=`Actualizado hace ${Math.floor(mins/60)}h`;ultColor='var(--yellow)';}
+    else{ultTxt=`Actualizado hace ${Math.floor(mins/1440)}d`;ultColor='var(--red)';}
+  }
+
+  const gruposH=['Global','México','FIBRA'].map(g=>{
+    const stocks=D.gbm.filter(a=>a.g===g);
+    const rows=stocks.map(a=>{
+      const idx=D.gbm.indexOf(a);
+      const tm=a.tits*a.pm,tc=a.tits*a.pp,plus=tm-tc;
+      const plusPct=tc>0?(plus/tc*100):0;
+      const cfg=sCfg[a.st]||sCfg.mantener;
+      return `<tr>
+        <td><div style="font-family:var(--mono);font-weight:700;font-size:11px">${a.t}</div><div style="font-size:9px;color:var(--muted)">${a.n}</div></td>
+        <td><input class="inp inp-sm" type="number" value="${a.tits}" onchange="updGBM(${idx},'tits',this.value)"></td>
+        <td><input class="inp inp-md" type="number" step="0.01" value="${a.pp.toFixed(2)}" onchange="updGBM(${idx},'pp',this.value)"></td>
+        <td><input class="inp inp-md" type="number" step="0.01" value="${a.pm.toFixed(2)}" onchange="updGBM(${idx},'pm',this.value)"></td>
+        <td style="font-family:var(--mono);color:var(--blue)">${fmtK(tm)}</td>
+        <td style="font-family:var(--mono);color:${gc(plus)}">${pct(plusPct)}</td>
+        <td><span class="bdg ${cfg.cls}">${cfg.l}</span></td>
+        <td><button class="btn-del" onclick="delGBM(${idx})"><i class="fa fa-trash"></i></button></td>
+      </tr>`;
+    }).join('');
+    return `
+    <div class="sec">${gLbl[g]}</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Ticker</th><th>Títs</th><th>P.Prom</th><th>P.Mkt</th><th>Total</th><th>+/−</th><th>Estado</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="live-row">
+    <div class="live-bdg"><i id="live-ic" class="fa-solid fa-circle-dot"></i> Precios en vivo</div>
+    <div style="display:flex;gap:6px">
+      <button onclick="editApiKey()" class="upd-btn" style="color:var(--blue)">🔑 Key</button>
+      <button id="upd-btn" class="upd-btn">⟳ Actualizar</button>
+    </div>
+  </div>
+  <div style="font-size:10px;color:${ultColor};margin:-4px 0 12px;display:flex;align-items:center;gap:5px">
+    <span style="width:5px;height:5px;border-radius:50%;background:${ultColor};display:inline-block"></span>${ultTxt}
+  </div>
+  <div style="background:var(--yellow-d);border:1px solid #f0b42930;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted2);line-height:1.5">
+    ⚠️ Verifica precios en GBM antes de ejecutar órdenes reales.
+  </div>
+  <div class="card card-tap" onclick="editPoderCompra()" style="background:linear-gradient(135deg,#0a2436,#0d1420);border-color:var(--green)40;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">💵 Poder de Compra</div>
+      <span style="font-size:9px;color:var(--muted)">✏️ editar</span>
+    </div>
+    <div style="font-family:var(--mono);font-size:24px;font-weight:700;color:var(--green)">${fmt(totalPC)}</div>
+    <div style="font-size:10px;color:var(--muted2);margin-top:4px">
+      Efectivo: ${fmt(pc.efectivo)} ${pc.incluirAporte?'+ Aportación: '+fmt(pc.aporteSemanal):'(sin aportación)'}
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="g3">
+      <div class="mt"><div class="ml">Invertido</div><div class="mv">${fmtK(tComp)}</div></div>
+      <div class="mt"><div class="ml">Mercado</div><div class="mv" style="color:var(--blue)">${fmtK(tMkt)}</div></div>
+      <div class="mt"><div class="ml">Plusvalía</div><div class="mv" style="color:${gc(tPlus)}">${pct(tPlusPct)}</div></div>
+    </div>
+  </div>
+  ${gruposH}
+  <button class="btn-add" onclick="addGBM()">+ Agregar acción o FIBRA</button>`;
+}
+
+// ══════════════════════════════════════════
+// TAB DIVIDENDOS
+// ══════════════════════════════════════════
+function tplDivs(){
+  const avisosH=D.avisos.map((a,i)=>`<tr>
+    <td style="font-family:var(--mono);font-weight:700">${a.activo}</td>
+    <td><input class="inp inp-lg" type="date" value="${a.exDiv}" onchange="updAviso(${i},'exDiv',this.value)"></td>
+    <td><input class="inp inp-lg" type="date" value="${a.pago}" onchange="updAviso(${i},'pago',this.value)"></td>
+    <td><input class="inp inp-md" type="number" step="0.001" value="${a.monto}" onchange="updAviso(${i},'monto',this.value)"></td>
+    <td><input class="inp inp-sm" type="number" value="${a.tits}" onchange="updAviso(${i},'tits',this.value)"></td>
+    <td style="font-family:var(--mono);color:var(--green);font-weight:700">${fmt(a.monto*a.tits)}</td>
+    <td><button class="btn-del" onclick="delAviso(${i})"><i class="fa fa-trash"></i></button></td>
+  </tr>`).join('');
+
+  // Agrupar por año — 25→2025, 26→2026, sino "Otro"
+  const porAno={};
+  D.cobros.forEach((c,i)=>{
+    const ano=c.mes.includes('25')?'2025':c.mes.includes('26')?'2026':'Otro';
+    if(!porAno[ano]) porAno[ano]=[];
+    porAno[ano].push({...c,idx:i});
+  });
+
+  let totalGeneral=0;
+  const anosH=Object.keys(porAno).sort().map(ano=>{
+    const items=porAno[ano];
+    const totalAno=items.reduce((s,c)=>s+(c.bruto-c.isr),0);
+    totalGeneral+=totalAno;
+
+    // Resumen mensual
+    const porMes={};
+    items.forEach(c=>{
+      if(!porMes[c.mes]) porMes[c.mes]=0;
+      porMes[c.mes]+=(c.bruto-c.isr);
+    });
+    const resH=Object.entries(porMes).map(([m,t])=>
+      `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:11px;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted2)">${m}</span>
+        <span style="font-family:var(--mono);color:var(--green);font-weight:600">${fmt(t)}</span>
+      </div>`).join('');
+
+    const detH=items.map(c=>{
+      const neto=c.bruto-c.isr;
+      return `<tr>
+        <td><input class="inp inp-sm" type="text" value="${c.mes}" onchange="updCobro(${c.idx},'mes',this.value)"></td>
+        <td style="font-family:var(--mono);font-weight:700"><input class="inp inp-md" type="text" value="${c.activo}" onchange="updCobro(${c.idx},'activo',this.value)"></td>
+        <td><input class="inp inp-md" type="number" step="0.001" value="${c.bruto}" onchange="updCobro(${c.idx},'bruto',this.value)"></td>
+        <td><input class="inp inp-md" type="number" step="0.001" value="${c.isr}" onchange="updCobro(${c.idx},'isr',this.value)"></td>
+        <td style="font-family:var(--mono);color:${gc(neto)};font-weight:700">${fmt(neto)}</td>
+        <td><button class="btn-del" onclick="delCobro(${c.idx})"><i class="fa fa-trash"></i></button></td>
+      </tr>`;
+    }).join('');
+
+    return `
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px">
+      <div class="card-tap" onclick="toggleAno('${ano}')" style="padding:13px;display:flex;justify-content:space-between;align-items:center;background:var(--surface2)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="ano-arrow-${ano}" style="font-size:11px;color:var(--muted)">▶</span>
+          <span style="font-weight:700;font-size:14px">${ano}</span>
+          <span style="font-size:10px;color:var(--muted)">(${items.length} pagos)</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">${fmt(totalAno)}</div>
+      </div>
+      <div id="ano-content-${ano}" style="display:none">
+        <div style="padding:10px 13px;border-top:1px solid var(--border)">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Resumen mensual neto</div>
+          ${resH}
+        </div>
+        <div class="tbl-wrap" style="border:none;border-top:1px solid var(--border);border-radius:0">
+          <table><thead><tr><th>Mes</th><th>Activo</th><th>Bruto</th><th>ISR</th><th>Neto</th><th></th></tr></thead>
+          <tbody>${detH}</tbody></table>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const sofiIntH=D.sofipos.map(s=>{
+    const iMes=s.saldo*s.tasa/100/12;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div><div style="font-size:12px;font-weight:600">${s.n}</div>
+      <div style="font-size:10px;color:var(--muted)">${s.tasa}% anual sobre ${fmt(s.saldo)}</div></div>
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)">${fmt(iMes)}/mes</div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="hero" style="padding:16px">
+    <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Total Dividendos Cobrados (Neto)</div>
+    <div class="hero-cap" style="font-size:24px">${fmt(totalGeneral)}</div>
+    <div class="hero-sub">FIBRAs + Acciones MX · 2025-2026</div>
+  </div>
+
+  <div class="sec">📅 Próximos Pagos</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Activo</th><th>Ex-Div</th><th>Pago</th><th>$/Tít</th><th>Títs</th><th>Total Est.</th><th></th></tr></thead>
+      <tbody>${avisosH}</tbody>
+    </table></div>
+  </div>
+  <button class="btn-add" onclick="addAviso()">+ Agregar aviso de pago</button>
+
+  <div class="sec">💵 Historial por Año <span style="font-size:8px">(toca para expandir)</span></div>
+  ${anosH}
+  <button class="btn-add" onclick="addCobro()">+ Registrar cobro</button>
+
+  <div class="sec">🏦 Intereses SOFIPOs</div>
+  <div class="card">
+    ${sofiIntH}
+    <div style="display:flex;justify-content:space-between;padding-top:10px;margin-top:2px">
+      <div style="font-size:12px;font-weight:700">Total intereses/mes</div>
+      <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">${fmt(D.sofipos.reduce((s,x)=>s+(x.saldo*x.tasa/100/12),0))}</div>
+    </div>
+  </div>`;
+}
+
+function toggleAno(ano){
+  const c=document.getElementById('ano-content-'+ano);
+  const a=document.getElementById('ano-arrow-'+ano);
+  const open=c.style.display!=='none';
+  c.style.display=open?'none':'block';
+  a.style.transform=open?'':'rotate(90deg)';
+}
+
+// ══════════════════════════════════════════
+// TAB RADAR — con análisis de mercado
+// ══════════════════════════════════════════
+function tplRadar(){
+  const tc=D.tipoCambio;
+
+  const radarH=D.radar.map((r,i)=>{
+    const enZona=r.precio<=r.zMax;
+    const casiZona=r.precio<=(r.zMax*1.08);
+    const dist=((r.precio-r.zMax)/r.precio*100).toFixed(1);
+    const fill=Math.min(100,Math.max(5,((r.precio-r.zMin*0.85)/(r.obj-r.zMin*0.85))*100));
+    const pMXN=(r.precio*tc).toLocaleString('es-MX',{maximumFractionDigits:0});
+    const zMinMXN=(r.zMin*tc).toLocaleString('es-MX',{maximumFractionDigits:0});
+    const zMaxMXN=(r.zMax*tc).toLocaleString('es-MX',{maximumFractionDigits:0});
+    const objMXN=(r.obj*tc).toLocaleString('es-MX',{maximumFractionDigits:0});
+
+    let statusColor=enZona?'var(--green)':casiZona?'var(--yellow)':'var(--purple)';
+    let statusTxt=enZona?'✅ EN ZONA — evalúa entrar':casiZona?`⚡ A ${dist}% de la zona`:`⏳ ${dist}% sobre zona`;
+
+    return `<div class="radar-card ${enZona?'zona':''}" onclick="editRadar(${i})" style="${casiZona&&!enZona?'border-color:var(--yellow)40;':''}" >
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
+        <div>
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700">${r.t}</div>
+          <div style="font-size:10px;color:var(--muted)">${r.n}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--yellow)">$${r.precio} USD</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--blue);margin-top:1px">≈ $${pMXN} MXN</div>
+          <div style="font-size:9px;color:${statusColor};margin-top:3px">${statusTxt}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:3px">
+        <span>Zona: $${r.zMin}–$${r.zMax} USD</span><span>Objetivo: $${r.obj} (+${r.pot}%)</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--blue);margin-bottom:5px">
+        <span>≈ $${zMinMXN}–$${zMaxMXN} MXN</span><span>≈ $${objMXN} MXN</span>
+      </div>
+      <div class="bar-bg" style="height:3px">
+        <div class="bar-fill" style="width:${fill}%;background:${statusColor}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Noticias dinámicas generadas desde el portafolio
+  const noticias=[
+    {ic:'📊',t:'WALMEX — Acumulando en zona baja',txt:`Con 228 acciones a costo prom $53.83 y precio actual ~$46, tienes -12% pero con el reporte Q3 en octubre y dividendo de noviembre ($132 estimado) como catalizadores próximos.`,color:'var(--blue)'},
+    {ic:'📈',t:'MSFT — Recuperación sólida',txt:`Tu única acción de Microsoft pasó de $6,650 a $8,554 — un +28.65%. El precio objetivo de analistas es $576 USD. Buena tesis de largo plazo validada.`,color:'var(--green)'},
+    {ic:'🎯',t:'GOOGL — Cerca de zona de entrada',txt:`Cotiza cerca de $178 USD. Tu zona ideal es $160-175. Podrías estar a pocas semanas de una oportunidad real si el mercado corrige.`,color:'var(--yellow)'},
+    {ic:'₿',t:'BTC — Recuperación +4.49% hoy',txt:`Bitcoin subió hoy. Tu posición de 0.00325665 BTC vale $4,336 MXN con ganancia histórica neta en proceso. Continúa DCA semanal.`,color:'var(--orange)'},
+    {ic:'🔴',t:'NFLX — Sigue bajo costo promedio',txt:`Con 5 acciones a $1,561 costo prom y precio ~$1,294, llevas -17%. Los fundamentales siguen sólidos. No vender, esperar recuperación.`,color:'var(--red)'},
+    {ic:'💰',t:'SOFIPOs — $${fmt(D.sofipos.reduce((s,x)=>s+(x.saldo*x.tasa/100/12),0))} al mes en intereses',txt:`Nu Cajita Turbo al 13% y DiDi al 15% generan ingreso pasivo mensual constante sin riesgo de mercado.`,color:'var(--green)'},
+  ];
+
+  const noticiasH=noticias.map(n=>`
+    <div class="noticia-card">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span style="font-size:16px">${n.ic}</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:${n.color};margin-bottom:3px">${n.t}</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">${n.txt}</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  return `
+  <div style="background:var(--purple-d);border:1px solid #a78bfa25;border-radius:12px;padding:13px;margin-bottom:14px">
+    <div style="font-size:12px;color:var(--purple);font-weight:700;margin-bottom:3px">🎯 Estrategia de entrada</div>
+    <div style="font-size:11px;color:var(--muted2);line-height:1.6">No entrar en máximos. Cada acción tiene zona verde ideal. Fuera de ella, esperamos. Toca para editar. ✅ En zona · ⚡ Casi · ⏳ Esperar</div>
+  </div>
+
+  <div class="card card-tap" onclick="editTipoCambio()" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:14px">
+    <div>
+      <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">💱 Tipo de cambio USD/MXN</div>
+      <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--blue)">$${tc.toFixed(4)}</div>
+    </div>
+    <span style="font-size:9px;color:var(--muted)">✏️ editar</span>
+  </div>
+
+  ${radarH}
+  <button class="btn-add" onclick="addRadar()">+ Agregar al radar</button>
+
+  <div class="sec">📰 Análisis de tu portafolio</div>
+  ${noticiasH}`;
+}
+
+// ══════════════════════════════════════════
+// TAB AGENDA
+// ══════════════════════════════════════════
+function tplAgenda(){
+  const cfg={
+    alta:{c:'var(--red)',b:'var(--red-d)',l:'Urgente'},
+    media:{c:'var(--yellow)',b:'var(--yellow-d)',l:'Importante'},
+    baja:{c:'var(--blue)',b:'var(--blue-d)',l:'Seguimiento'},
+  };
+  const legend=Object.entries(cfg).map(([k,v])=>
+    `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:${v.c};margin-right:10px">
+      <span style="width:5px;height:5px;border-radius:50%;background:${v.c};display:inline-block"></span>${v.l}
+    </span>`).join('');
+  const items=D.agenda.map(e=>{
+    const u=cfg[e.u];
+    return `<div class="ag-item" style="background:${u.b};border-color:${u.c}30;border-left-color:${u.c}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;margin-bottom:3px">${e.ic} ${e.t}</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">${e.d}</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:${u.c};padding:3px 7px;border-radius:6px;white-space:nowrap;border:1px solid ${u.c}30">${e.f}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div style="margin-bottom:14px">${legend}</div>${items}`;
+}
+
+// ══════════════════════════════════════════
+// MODALES
+// ══════════════════════════════════════════
+function abrirModal(html){document.getElementById('modal-body').innerHTML=html;document.getElementById('modal').classList.add('open');}
+function cerrarModal(){document.getElementById('modal').classList.remove('open');}
+
+function editPilar(id){
+  const p=D.pilares.find(x=>x.id===id);
+  abrirModal(`<div class="modal-title">${p.ic} ${p.n} <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <label class="lbl">Saldo actual (MXN)</label><input class="inp-full" type="number" id="ep-s" value="${p.saldo}">
+  <label class="lbl">Aportación mensual (MXN)</label><input class="inp-full" type="number" id="ep-a" value="${p.aporte}">
+  ${p.tasa?`<label class="lbl">Tasa anual (%)</label><input class="inp-full" type="number" id="ep-t" value="${p.tasa}" step="0.01">`:''}
+  <button class="btn-save" onclick="savePilar('${id}')">Guardar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+}
+function savePilar(id){
+  const p=D.pilares.find(x=>x.id===id);
+  p.saldo=+document.getElementById('ep-s').value||p.saldo;
+  p.aporte=+document.getElementById('ep-a').value||p.aporte;
+  const t=document.getElementById('ep-t');
+  if(t) p.tasa=+t.value||p.tasa;
+  guardar();cerrarModal();renderTab();
+}
+
+function editSofipo(id){
+  const s=D.sofipos.find(x=>x.id===id);
+  abrirModal(`<div class="modal-title">${s.ic} ${s.n} <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <label class="lbl">Saldo actual (MXN)</label><input class="inp-full" type="number" id="es-s" value="${s.saldo}" step="0.01">
+  <label class="lbl">Tasa anual (%)</label><input class="inp-full" type="number" id="es-t" value="${s.tasa}" step="0.01">
+  <label class="lbl">Meta de tope (MXN)</label><input class="inp-full" type="number" id="es-m" value="${s.meta}">
+  <label class="lbl">Nota</label><input class="inp-full" type="text" id="es-n" value="${s.nota}">
+  <button class="btn-save" onclick="saveSofipo('${id}')">Guardar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+}
+function saveSofipo(id){
+  const s=D.sofipos.find(x=>x.id===id);
+  s.saldo=+document.getElementById('es-s').value||s.saldo;
+  s.tasa=+document.getElementById('es-t').value||s.tasa;
+  s.meta=+document.getElementById('es-m').value||s.meta;
+  s.nota=document.getElementById('es-n').value||s.nota;
+  // Sincronizar pilar sofi
+  D.pilares.find(p=>p.id==='sofi').saldo=D.sofipos.reduce((s,x)=>s+x.saldo,0);
+  guardar();cerrarModal();renderTab();
+}
+function addSofipo(){
+  D.sofipos.push({id:'sofi_'+Date.now(),n:'Nueva SOFIPO',saldo:0,tasa:10,meta:10000,c:'#64748b',ic:'🏦',nota:''});
+  guardar();renderTab();
+}
+
+// YoTePresto
+function editYTP(){
+  abrirModal(`<div class="modal-title">🤝 YoTePresto <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <label class="lbl">Saldo actual (MXN)</label><input class="inp-full" type="number" id="ytp-s" value="${D.ytp.saldo}" step="0.01">
+  <label class="lbl">Tasa promedio anual (%)</label><input class="inp-full" type="number" id="ytp-t" value="${D.ytp.tasa}" step="0.01">
+  <label class="lbl">Aportación mensual (MXN)</label><input class="inp-full" type="number" id="ytp-a" value="${D.ytp.aporte}">
+  <div style="background:var(--blue-d);border-radius:8px;padding:10px;margin-bottom:14px;font-size:11px;color:var(--muted2)">
+    💡 Interés mensual estimado: <span style="color:var(--green);font-weight:700" id="ytp-preview">${fmt(D.ytp.saldo*D.ytp.tasa/100/12)}</span>
+  </div>
+  <button class="btn-save" onclick="saveYTP()">Guardar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+  document.getElementById('ytp-t').oninput=document.getElementById('ytp-s').oninput=function(){
+    const s=+document.getElementById('ytp-s').value||0;
+    const t=+document.getElementById('ytp-t').value||0;
+    document.getElementById('ytp-preview').textContent=fmt(s*t/100/12);
+  };
+}
+function saveYTP(){
+  D.ytp.saldo=+document.getElementById('ytp-s').value||D.ytp.saldo;
+  D.ytp.tasa=+document.getElementById('ytp-t').value||D.ytp.tasa;
+  D.ytp.aporte=+document.getElementById('ytp-a').value||D.ytp.aporte;
+  D.pilares.find(p=>p.id==='ytp').saldo=D.ytp.saldo;
+  D.pilares.find(p=>p.id==='ytp').tasa=D.ytp.tasa;
+  guardar();cerrarModal();renderTab();
+}
+
+// Finsus
+function editFinsus(){
+  const totalF=totalFinsus();
+  const tasaF=totalF>0?D.finsus.aportaciones.reduce((s,a)=>s+(a.tasa*a.monto),0)/totalF:0;
+
+  const aportH=D.finsus.aportaciones.map((a,i)=>`
+    <div style="background:var(--surface3);border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid var(--border2)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-family:var(--mono);font-weight:700;color:var(--purple)">${fmt(a.monto)}</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="bdg bb">${a.tasa}%</span>
+          <button class="btn-del" onclick="delFinsusAport(${i})"><i class="fa fa-trash"></i></button>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted)">Fecha: ${a.fecha} · Vence: ${a.vence}</div>
+    </div>`).join('');
+
+  abrirModal(`<div class="modal-title">💜 Finsus <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <div style="background:var(--purple-d);border-radius:8px;padding:10px;margin-bottom:14px">
+    <div style="font-size:11px;color:var(--muted2)">Total: <span style="color:var(--purple);font-weight:700">${fmt(totalF)}</span> · Tasa prom: <span style="color:var(--green);font-weight:700">${tasaF.toFixed(2)}%</span></div>
+  </div>
+  <div style="max-height:200px;overflow-y:auto;margin-bottom:14px">${aportH}</div>
+  <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:10px">+ Nueva aportación</div>
+  <label class="lbl">Monto (MXN)</label><input class="inp-full" type="number" id="fn-m" placeholder="0.00" step="0.01">
+  <label class="lbl">Tasa anual (%)</label><input class="inp-full" type="number" id="fn-t" placeholder="10.0" step="0.01">
+  <label class="lbl">Fecha de inversión</label><input class="inp-full" type="date" id="fn-f" value="${new Date().toISOString().slice(0,10)}">
+  <label class="lbl">Fecha de vencimiento</label><input class="inp-full" type="date" id="fn-v">
+  <button class="btn-save" onclick="addFinsusAport()">+ Agregar aportación</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cerrar</button>`);
+}
+function addFinsusAport(){
+  const m=+document.getElementById('fn-m').value||0;
+  const t=+document.getElementById('fn-t').value||0;
+  const f=document.getElementById('fn-f').value;
+  const v=document.getElementById('fn-v').value;
+  if(m<=0||t<=0){toast('⚠️ Ingresa monto y tasa');return;}
+  D.finsus.aportaciones.push({fecha:f,monto:m,tasa:t,vence:v});
+  D.pilares.find(p=>p.id==='fins').saldo=totalFinsus();
+  guardar();cerrarModal();renderTab();
+}
+function delFinsusAport(i){
+  D.finsus.aportaciones.splice(i,1);
+  D.pilares.find(p=>p.id==='fins').saldo=totalFinsus();
+  guardar();renderTab();cerrarModal();editFinsus();
+}
+
+// Cripto
+function editCripto(i){
+  const c=D.cripto[i];
+  abrirModal(`<div class="modal-title">${c.ic} ${c.n} <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <label class="lbl">Cantidad de ${c.t}</label><input class="inp-full" type="number" id="ec-cant" value="${c.cant}" step="0.00000001">
+  <label class="lbl">Valor total en MXN (actual)</label><input class="inp-full" type="number" id="ec-pm" value="${c.pm}" step="0.01">
+  <label class="lbl">Costo total de compra (MXN)</label><input class="inp-full" type="number" id="ec-costo" value="${c.costo}" step="0.01">
+  <label class="lbl">Cambio 24h (%)</label><input class="inp-full" type="number" id="ec-camb" value="${c.cambio24h||0}" step="0.01">
+  <div style="background:var(--surface2);border-radius:8px;padding:10px;margin-bottom:14px;font-size:11px">
+    <div style="color:var(--muted);margin-bottom:3px">Ganancia/Pérdida:</div>
+    <div id="cripto-ganancia" style="font-family:var(--mono);font-weight:700;font-size:14px"></div>
+  </div>
+  <button class="btn-save" onclick="saveCripto(${i})">Guardar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+  const calcGan=()=>{
+    const pm=+document.getElementById('ec-pm').value||0;
+    const costo=+document.getElementById('ec-costo').value||0;
+    const gan=pm-costo;
+    const el=document.getElementById('cripto-ganancia');
+    el.style.color=gan>=0?'var(--green)':'var(--red)';
+    el.textContent=(gan>=0?'+':'')+fmt(gan)+' ('+(costo>0?((gan/costo*100).toFixed(2)):'0.00')+'%)';
+  };
+  document.getElementById('ec-pm').oninput=document.getElementById('ec-costo').oninput=calcGan;
+  calcGan();
+}
+function saveCripto(i){
+  const nuevoPm=+document.getElementById('ec-pm').value||D.cripto[i].pm;
+  D.cripto[i].cant=+document.getElementById('ec-cant').value||D.cripto[i].cant;
+  D.cripto[i].costo=+document.getElementById('ec-costo').value||D.cripto[i].costo;
+  D.cripto[i].cambio24h=+document.getElementById('ec-camb').value||0;
+  if(nuevoPm!==D.cripto[i].pm){
+    if(!D.cripto[i].historial)D.cripto[i].historial=[];
+    D.cripto[i].historial.push(nuevoPm);
+    if(D.cripto[i].historial.length>10)D.cripto[i].historial.shift();
+  }
+  D.cripto[i].pm=nuevoPm;
+  guardar();cerrarModal();renderTab();
+}
+
+// GBM
+function updGBM(i,f,v){D.gbm[i][f]=f==='t'||f==='n'||f==='g'||f==='td'?v:(parseFloat(v)||0);guardar();renderTab();}
+function delGBM(i){if(confirm('¿Eliminar '+D.gbm[i].t+'?')){D.gbm.splice(i,1);guardar();renderTab();}}
+function addGBM(){
+  const opts=Object.keys(sCfg).map(k=>`<option value="${k}">${sCfg[k].l}</option>`).join('');
+  abrirModal(`<div class="modal-title">+ Nueva posición <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <label class="lbl">Ticker</label><input class="inp-full" type="text" id="ng-t" placeholder="MSFT">
+  <label class="lbl">Nombre</label><input class="inp-full" type="text" id="ng-n" placeholder="Microsoft">
+  <label class="lbl">Grupo</label><select class="inp-full" id="ng-g"><option>Global</option><option>México</option><option>FIBRA</option></select>
+  <label class="lbl">Títulos</label><input class="inp-full" type="number" id="ng-ti" placeholder="0">
+  <label class="lbl">Precio promedio (MXN)</label><input class="inp-full" type="number" id="ng-pp" step="0.01">
+  <label class="lbl">Precio mercado (MXN)</label><input class="inp-full" type="number" id="ng-pm" step="0.01">
+  <label class="lbl">Estado</label><select class="inp-full" id="ng-st">${opts}</select>
+  <label class="lbl">Ticker Twelve Data (ej: MSFT o WALMEX:BMV)</label><input class="inp-full" type="text" id="ng-td">
+  <button class="btn-save" onclick="saveAddGBM()">Agregar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+}
+function saveAddGBM(){
+  D.gbm.push({t:document.getElementById('ng-t').value.toUpperCase(),n:document.getElementById('ng-n').value,g:document.getElementById('ng-g').value,tits:+document.getElementById('ng-ti').value||0,pp:+document.getElementById('ng-pp').value||0,pm:+document.getElementById('ng-pm').value||0,st:document.getElementById('ng-st').value,td:document.getElementById('ng-td').value});
+  guardar();cerrarModal();renderTab();
+}
+
+function editPoderCompra(){
+  const pc=D.poderCompra;
+  abrirModal(`<div class="modal-title">💵 Poder de Compra <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <label class="lbl">Efectivo disponible (MXN)</label><input class="inp-full" type="number" id="pc-ef" value="${pc.efectivo}" step="0.01">
+  <label class="lbl">Aportación semanal (MXN)</label><input class="inp-full" type="number" id="pc-ap" value="${pc.aporteSemanal}" step="0.01">
+  <label class="lbl" style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+    <input type="checkbox" id="pc-inc" ${pc.incluirAporte?'checked':''} style="width:16px;height:16px"> Sumar aportación al total
+  </label>
+  <button class="btn-save" onclick="savePoderCompra()">Guardar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+}
+function savePoderCompra(){
+  D.poderCompra.efectivo=+document.getElementById('pc-ef').value||0;
+  D.poderCompra.aporteSemanal=+document.getElementById('pc-ap').value||0;
+  D.poderCompra.incluirAporte=document.getElementById('pc-inc').checked;
+  guardar();cerrarModal();renderTab();
+}
+
+function editApiKey(){
+  abrirModal(`<div class="modal-title">🔑 Twelve Data API Key <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <div style="background:var(--blue-d);border-radius:8px;padding:10px;margin-bottom:14px;font-size:11px;color:var(--muted2)">
+    Obtén tu key gratis en <strong style="color:var(--blue)">twelvedata.com</strong> — 800 consultas/día sin costo.
+  </div>
+  <label class="lbl">API Key</label>
+  <input class="inp-full" type="text" id="ak-val" value="${D.apiKey||''}" autocomplete="off">
+  <button class="btn-save" onclick="saveApiKey()">Guardar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+}
+function saveApiKey(){D.apiKey=document.getElementById('ak-val').value.trim();guardar();cerrarModal();toast('✓ API key guardada');}
+
+function editTipoCambio(){
+  abrirModal(`<div class="modal-title">💱 Tipo de Cambio USD/MXN <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <label class="lbl">Pesos por 1 dólar</label>
+  <input class="inp-full" type="number" id="tc-val" value="${D.tipoCambio}" step="0.0001">
+  <button class="btn-save" onclick="saveTipoCambio()">Guardar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+}
+function saveTipoCambio(){D.tipoCambio=+document.getElementById('tc-val').value||D.tipoCambio;guardar();cerrarModal();renderTab();}
+
+function updAviso(i,f,v){D.avisos[i][f]=f==='activo'||f==='exDiv'||f==='pago'?v:(parseFloat(v)||0);guardar();renderTab();}
+function delAviso(i){D.avisos.splice(i,1);guardar();renderTab();}
+function addAviso(){D.avisos.push({activo:'',exDiv:'',pago:'',monto:0,tits:0});guardar();renderTab();}
+
+function updCobro(i,f,v){D.cobros[i][f]=f==='mes'||f==='activo'?v:(parseFloat(v)||0);guardar();renderTab();}
+function delCobro(i){D.cobros.splice(i,1);guardar();renderTab();}
+function addCobro(){D.cobros.push({mes:'Sep 26',activo:'',bruto:0,isr:0});guardar();renderTab();}
+
+function editRadar(i){
+  const r=D.radar[i];
+  abrirModal(`<div class="modal-title">📡 ${r.t} <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <label class="lbl">Precio actual (USD)</label><input class="inp-full" type="number" id="er-p" value="${r.precio}" step="0.01">
+  <label class="lbl">Zona mínima compra (USD)</label><input class="inp-full" type="number" id="er-mn" value="${r.zMin}" step="0.01">
+  <label class="lbl">Zona máxima compra (USD)</label><input class="inp-full" type="number" id="er-mx" value="${r.zMax}" step="0.01">
+  <label class="lbl">Precio objetivo (USD)</label><input class="inp-full" type="number" id="er-o" value="${r.obj}" step="0.01">
+  <label class="lbl">Potencial estimado (%)</label><input class="inp-full" type="number" id="er-pot" value="${r.pot}" step="0.1">
+  <button class="btn-save" onclick="saveRadar(${i})">Guardar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+}
+function saveRadar(i){
+  D.radar[i].precio=+document.getElementById('er-p').value||D.radar[i].precio;
+  D.radar[i].zMin=+document.getElementById('er-mn').value||D.radar[i].zMin;
+  D.radar[i].zMax=+document.getElementById('er-mx').value||D.radar[i].zMax;
+  D.radar[i].obj=+document.getElementById('er-o').value||D.radar[i].obj;
+  D.radar[i].pot=+document.getElementById('er-pot').value||D.radar[i].pot;
+  guardar();cerrarModal();renderTab();
+}
+function addRadar(){
+  abrirModal(`<div class="modal-title">+ Agregar al Radar <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+  <label class="lbl">Ticker</label><input class="inp-full" type="text" id="ar-t" placeholder="GOOGL">
+  <label class="lbl">Nombre</label><input class="inp-full" type="text" id="ar-n">
+  <label class="lbl">Precio actual (USD)</label><input class="inp-full" type="number" id="ar-p" step="0.01">
+  <label class="lbl">Zona mínima</label><input class="inp-full" type="number" id="ar-mn" step="0.01">
+  <label class="lbl">Zona máxima</label><input class="inp-full" type="number" id="ar-mx" step="0.01">
+  <label class="lbl">Precio objetivo</label><input class="inp-full" type="number" id="ar-o" step="0.01">
+  <label class="lbl">Potencial %</label><input class="inp-full" type="number" id="ar-pot" step="0.1">
+  <label class="lbl">Ticker Yahoo (ej: GOOGL)</label><input class="inp-full" type="text" id="ar-yt">
+  <button class="btn-save" onclick="saveAddRadar()">Agregar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
+}
+function saveAddRadar(){
+  D.radar.push({t:document.getElementById('ar-t').value.toUpperCase(),n:document.getElementById('ar-n').value,precio:+document.getElementById('ar-p').value||0,zMin:+document.getElementById('ar-mn').value||0,zMax:+document.getElementById('ar-mx').value||0,obj:+document.getElementById('ar-o').value||0,pot:+document.getElementById('ar-pot').value||0,mon:'USD',yt:document.getElementById('ar-yt').value});
+  guardar();cerrarModal();renderTab();
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';},2500);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+renderTab();
+if(navigator.userAgent.includes('Safari')&&!navigator.userAgent.includes('Chrome')&&!window.navigator.standalone){
+  setTimeout(()=>toast('Toca Compartir → "Añadir a pantalla de inicio"'),2000);
+}
+setInterval(()=>{if(!document.hidden&&tab==='gbm')actualizarPrecios();},5*60*1000);
+</script>
+</body>
+</html>
