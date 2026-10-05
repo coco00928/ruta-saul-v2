@@ -141,7 +141,7 @@ select.inp-full{cursor:pointer;}
 // ══════════════════════════════════════════
 // APP VERSION
 // ══════════════════════════════════════════
-const APP_VERSION = '2026.09.27-v5';
+const APP_VERSION = '2026.09.27-v7';
 
 // ══════════════════════════════════════════
 // DATOS BASE — Portafolio real Sep 2026
@@ -161,8 +161,8 @@ const DEF = {
 
   // ── SOFIPOs ──
   sofipos:[
-    {id:'nu',   n:'Nu Cajita Turbo', saldo:25290.51, tasa:13.00, meta:25000, c:'#a855f7', ic:'🟣', nota:'Topada $25K ✅'},
-    {id:'didi', n:'DiDi Cuenta',     saldo:2884.54,  tasa:15.00, meta:10000, c:'#00e5a0', ic:'🟢', nota:'Meta: $10K'},
+    {id:'nu',   n:'Nu Cajita Turbo', saldo:25290.51, tasa:13.00, meta:25000, c:'#a855f7', ic:'🟣', nota:'Topada $25K', bloqueada:true},
+    {id:'didi', n:'DiDi Cuenta',     saldo:2884.54,  tasa:15.00, meta:10000, c:'#00e5a0', ic:'🟢', nota:'Meta: $10K', bloqueada:false},
   ],
 
   // ── YoTePresto ──
@@ -541,24 +541,44 @@ function tplGeneral(){
     const iMes=s.saldo*s.tasa/100/12;
     const iAno=s.saldo*s.tasa/100;
     const enMeta=s.saldo>=s.meta;
-    return `<div class="sofi-card" style="border-color:${enMeta?s.c+'50':'var(--border)'};cursor:pointer" onclick="editSofipo('${s.id}')">
+    const bloq=s.bloqueada||false;
+    // Color del borde: verde si topada y bloqueada, color normal si no
+    const borderColor=bloq?'var(--green)':enMeta?s.c+'50':'var(--border)';
+    return `<div class="sofi-card" style="border-color:${borderColor};border-width:${bloq?'2px':'1px'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
         <div style="display:flex;align-items:center;gap:7px">
           <span style="font-size:17px">${s.ic}</span>
-          <div><div style="font-weight:700;font-size:13px">${s.n}</div>
-          <div style="font-size:10px;color:var(--muted)">${s.nota}</div></div>
+          <div>
+            <div style="font-weight:700;font-size:13px">${s.n}</div>
+            <div style="font-size:10px;color:var(--muted)">${s.nota}</div>
+          </div>
         </div>
-        <div style="text-align:right">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
           <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:${s.c}">${fmt(s.saldo)}</div>
           <div style="font-size:10px;color:var(--muted)">Tasa: <span style="color:var(--green);font-weight:700">${s.tasa}% anual</span></div>
         </div>
       </div>
+
+      <!-- Barra de progreso hacia meta -->
       <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:4px">
         <span>Meta: ${fmt(s.meta)}</span>
-        <span>${enMeta?'✅ Topada':'Falta: '+fmt(falta)}</span>
+        <span style="color:${enMeta?'var(--green)':'var(--muted)'}">${enMeta?'🎯 Límite alcanzado':'Falta: '+fmt(falta)}</span>
       </div>
-      <div class="bar-bg" style="height:5px"><div class="bar-fill" style="width:${pp}%;background:${s.c}"></div></div>
-      <div class="g2" style="margin-top:8px">
+      <div class="bar-bg" style="height:6px"><div class="bar-fill" style="width:${pp}%;background:${enMeta?'var(--green)':s.c}"></div></div>
+
+      <!-- Candado y estado -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="toggleCandado('${s.id}')" style="background:${bloq?'var(--green-d)':'var(--surface)'};border:1px solid ${bloq?'var(--green)':'var(--border2)'};border-radius:8px;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:11px;color:${bloq?'var(--green)':'var(--muted)'}">
+            ${bloq?'🔒 Topada':'🔓 Editable'}
+          </button>
+          ${bloq?`<span style="font-size:9px;color:var(--muted2)">Toca 🔓 para modificar</span>`:''}
+        </div>
+        ${!bloq?`<button onclick="editSofipo('${s.id}')" style="background:var(--blue-d);border:1px solid var(--blue)30;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:11px;color:var(--blue);font-weight:700">✏️ Editar</button>`:''}
+      </div>
+
+      <!-- Métricas -->
+      <div class="g2">
         <div style="background:var(--surface);border-radius:8px;padding:7px 10px;text-align:center">
           <div style="font-size:8px;color:var(--muted);margin-bottom:2px">INTERÉS/MES</div>
           <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">${fmt(iMes)}</div>
@@ -568,6 +588,8 @@ function tplGeneral(){
           <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">${fmt(iAno)}</div>
         </div>
       </div>
+
+      ${bloq?`<div style="margin-top:8px;background:var(--green-d);border-radius:8px;padding:8px 10px;font-size:10px;color:var(--green);text-align:center">🔒 Cuenta topada en ${fmt(s.meta)} — generando ${fmt(iMes)}/mes</div>`:''}
     </div>`;
   }).join('');
 
@@ -1045,28 +1067,109 @@ function savePilar(id){
   guardar();cerrarModal();renderTab();
 }
 
+function toggleCandado(id){
+  const s=D.sofipos.find(x=>x.id===id);
+  if(s.bloqueada){
+    // Mostrar modal para desbloquear o editar directamente
+    abrirModal(`<div class="modal-title">🔒 ${s.n} <button class="modal-close" onclick="cerrarModal()">✕</button></div>
+    <div style="background:var(--green-d);border:1px solid var(--green)30;border-radius:10px;padding:14px;margin-bottom:16px;text-align:center">
+      <div style="font-size:24px;margin-bottom:6px">🔒</div>
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px">Cuenta topada</div>
+      <div style="font-family:var(--mono);font-size:18px;font-weight:700">${fmt(s.saldo)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">Tasa: ${s.tasa}% · Interés/mes: ${fmt(s.saldo*s.tasa/100/12)}</div>
+    </div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:16px;line-height:1.6">¿Qué quieres hacer?</div>
+    <button class="btn-save" style="margin-bottom:10px" onclick="desbloquearYEditar('${id}')">🔓 Desbloquear y editar saldo/tasa</button>
+    <button class="btn-cancel" onclick="cerrarModal()">Cancelar — mantener bloqueada</button>`);
+  }else{
+    s.bloqueada=true;
+    guardar();renderTab();
+    toast('🔒 '+s.n+' bloqueada como topada');
+  }
+}
+
+function desbloquearYEditar(id){
+  const s=D.sofipos.find(x=>x.id===id);
+  s.bloqueada=false;
+  guardar();
+  cerrarModal();
+  // Pequeño delay para que el modal anterior cierre antes de abrir el nuevo
+  setTimeout(()=>editSofipo(id), 200);
+}
+
 function editSofipo(id){
   const s=D.sofipos.find(x=>x.id===id);
+  const iMesPreview=s.saldo*s.tasa/100/12;
   abrirModal(`<div class="modal-title">${s.ic} ${s.n} <button class="modal-close" onclick="cerrarModal()">✕</button></div>
-  <label class="lbl">Saldo actual (MXN)</label><input class="inp-full" type="number" id="es-s" value="${s.saldo}" step="0.01">
-  <label class="lbl">Tasa anual (%)</label><input class="inp-full" type="number" id="es-t" value="${s.tasa}" step="0.01">
-  <label class="lbl">Meta de tope (MXN)</label><input class="inp-full" type="number" id="es-m" value="${s.meta}">
-  <label class="lbl">Nota</label><input class="inp-full" type="text" id="es-n" value="${s.nota}">
-  <button class="btn-save" onclick="saveSofipo('${id}')">Guardar</button>
+
+  <div style="background:var(--blue-d);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:var(--muted2)">
+    🔓 Modo edición activo — modifica el saldo si retiraste o depositaste dinero
+  </div>
+
+  <label class="lbl">Saldo actual (MXN)</label>
+  <input class="inp-full" type="number" id="es-s" value="${s.saldo}" step="0.01" oninput="previsualizarSofi()">
+
+  <label class="lbl">Tasa anual (%)</label>
+  <input class="inp-full" type="number" id="es-t" value="${s.tasa}" step="0.01" oninput="previsualizarSofi()">
+
+  <label class="lbl">Meta / Límite de la cuenta (MXN)</label>
+  <input class="inp-full" type="number" id="es-m" value="${s.meta}" step="100">
+
+  <label class="lbl">Nota</label>
+  <input class="inp-full" type="text" id="es-n" value="${s.nota}">
+
+  <!-- Preview en tiempo real -->
+  <div style="background:var(--green-d);border:1px solid var(--green)30;border-radius:10px;padding:12px;margin-bottom:14px">
+    <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Vista previa</div>
+    <div class="g2">
+      <div style="text-align:center">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:3px">Interés/mes</div>
+        <div id="es-preview-mes" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">${fmt(iMesPreview)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:3px">Interés/año</div>
+        <div id="es-preview-ano" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">${fmt(iMesPreview*12)}</div>
+      </div>
+    </div>
+  </div>
+
+  <label class="lbl" style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+    <input type="checkbox" id="es-bloq" style="width:16px;height:16px">
+    🔒 Bloquear como topada al guardar
+  </label>
+
+  <button class="btn-save" onclick="saveSofipo('${id}')">Guardar cambios</button>
   <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
 }
+
+function previsualizarSofi(){
+  const s=+document.getElementById('es-s').value||0;
+  const t=+document.getElementById('es-t').value||0;
+  const iMes=s*t/100/12;
+  const mes=document.getElementById('es-preview-mes');
+  const ano=document.getElementById('es-preview-ano');
+  if(mes) mes.textContent=fmt(iMes);
+  if(ano) ano.textContent=fmt(iMes*12);
+}
+
 function saveSofipo(id){
   const s=D.sofipos.find(x=>x.id===id);
   s.saldo=+document.getElementById('es-s').value||s.saldo;
   s.tasa=+document.getElementById('es-t').value||s.tasa;
   s.meta=+document.getElementById('es-m').value||s.meta;
   s.nota=document.getElementById('es-n').value||s.nota;
+  const bloqCheck=document.getElementById('es-bloq');
+  if(bloqCheck&&bloqCheck.checked) s.bloqueada=true;
+  // Verificar si llegó a la meta automáticamente
+  if(s.saldo>=s.meta) s.bloqueada=true;
   // Sincronizar pilar sofi
-  D.pilares.find(p=>p.id==='sofi').saldo=D.sofipos.reduce((s,x)=>s+x.saldo,0);
+  D.pilares.find(p=>p.id==='sofi').saldo=D.sofipos.reduce((sum,x)=>sum+x.saldo,0);
   guardar();cerrarModal();renderTab();
+  toast('✓ '+s.n+' actualizada'+(s.bloqueada?' 🔒':''));
 }
+
 function addSofipo(){
-  D.sofipos.push({id:'sofi_'+Date.now(),n:'Nueva SOFIPO',saldo:0,tasa:10,meta:10000,c:'#64748b',ic:'🏦',nota:''});
+  D.sofipos.push({id:'sofi_'+Date.now(),n:'Nueva SOFIPO',saldo:0,tasa:10,meta:10000,c:'#64748b',ic:'🏦',nota:'',bloqueada:false});
   guardar();renderTab();
 }
 
