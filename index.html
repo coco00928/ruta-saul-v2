@@ -141,7 +141,7 @@ select.inp-full{cursor:pointer;}
 // ══════════════════════════════════════════
 // APP VERSION
 // ══════════════════════════════════════════
-const APP_VERSION = '2026.09.27-v7';
+const APP_VERSION = '2026.10.05-v8';
 
 // ══════════════════════════════════════════
 // DATOS BASE — Portafolio real Sep 2026
@@ -385,7 +385,11 @@ const gLbl={Global:'🌎 Global',México:'🇲🇽 México',FIBRA:'🏢 FIBRA'};
 function totalGBM(){ return D.gbm.reduce((s,a)=>s+(a.tits*a.pm),0); }
 function totalCripto(){ return D.cripto.reduce((s,c)=>s+c.pm,0); }
 function totalSofipos(){ return D.sofipos.reduce((s,x)=>s+x.saldo,0); }
-function totalFinsus(){ return D.finsus.aportaciones.reduce((s,a)=>s+a.monto,0); }
+function totalFinsus(){ 
+  // Usa el saldo directo si existe, sino suma aportaciones
+  const p=D.pilares.find(x=>x.id==='fins');
+  return p.saldo||D.finsus.aportaciones.reduce((s,a)=>s+a.monto,0); 
+}
 
 function totalPilares(){
   const gbmV=totalGBM(), criptoV=totalCripto(), sofiV=totalSofipos(), finsV=totalFinsus();
@@ -597,10 +601,10 @@ function tplGeneral(){
   const ytpIntMes=D.ytp.saldo*D.ytp.tasa/100/12;
   const ytpIntAno=D.ytp.saldo*D.ytp.tasa/100;
 
-  // Finsus
-  const finsTotal=totalFinsus();
-  const finsTasa=D.finsus.aportaciones.length>0?
-    D.finsus.aportaciones.reduce((s,a)=>s+(a.tasa*a.monto),0)/finsTotal:0;
+  // Finsus — usar datos directos del pilar
+  const finsPilar=D.pilares.find(x=>x.id==='fins');
+  const finsTotal=finsPilar.saldo||0;
+  const finsTasa=finsPilar.tasa||10;
   const finsIntMes=finsTotal*finsTasa/100/12;
 
   // Cripto cards
@@ -1201,48 +1205,67 @@ function saveYTP(){
 
 // Finsus
 function editFinsus(){
-  const totalF=totalFinsus();
-  const tasaF=totalF>0?D.finsus.aportaciones.reduce((s,a)=>s+(a.tasa*a.monto),0)/totalF:0;
-
-  const aportH=D.finsus.aportaciones.map((a,i)=>`
-    <div style="background:var(--surface3);border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid var(--border2)">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <div style="font-family:var(--mono);font-weight:700;color:var(--purple)">${fmt(a.monto)}</div>
-        <div style="display:flex;gap:6px;align-items:center">
-          <span class="bdg bb">${a.tasa}%</span>
-          <button class="btn-del" onclick="delFinsusAport(${i})"><i class="fa fa-trash"></i></button>
-        </div>
-      </div>
-      <div style="font-size:10px;color:var(--muted)">Fecha: ${a.fecha} · Vence: ${a.vence}</div>
-    </div>`).join('');
+  const p=D.pilares.find(x=>x.id==='fins');
+  const saldoActual=p.saldo||0;
+  const tasaActual=p.tasa||10;
+  const iMes=saldoActual*tasaActual/100/12;
 
   abrirModal(`<div class="modal-title">💜 Finsus <button class="modal-close" onclick="cerrarModal()">✕</button></div>
-  <div style="background:var(--purple-d);border-radius:8px;padding:10px;margin-bottom:14px">
-    <div style="font-size:11px;color:var(--muted2)">Total: <span style="color:var(--purple);font-weight:700">${fmt(totalF)}</span> · Tasa prom: <span style="color:var(--green);font-weight:700">${tasaF.toFixed(2)}%</span></div>
+
+  <div style="background:var(--purple-d);border:1px solid var(--purple)30;border-radius:10px;padding:12px;margin-bottom:14px;text-align:center">
+    <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Saldo actual en Finsus</div>
+    <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--purple)">${fmt(saldoActual)}</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:3px">Interés mensual estimado: <span style="color:var(--green);font-weight:700">${fmt(iMes)}</span></div>
   </div>
-  <div style="max-height:200px;overflow-y:auto;margin-bottom:14px">${aportH}</div>
-  <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:10px">+ Nueva aportación</div>
-  <label class="lbl">Monto (MXN)</label><input class="inp-full" type="number" id="fn-m" placeholder="0.00" step="0.01">
-  <label class="lbl">Tasa anual (%)</label><input class="inp-full" type="number" id="fn-t" placeholder="10.0" step="0.01">
-  <label class="lbl">Fecha de inversión</label><input class="inp-full" type="date" id="fn-f" value="${new Date().toISOString().slice(0,10)}">
-  <label class="lbl">Fecha de vencimiento</label><input class="inp-full" type="date" id="fn-v">
-  <button class="btn-save" onclick="addFinsusAport()">+ Agregar aportación</button>
-  <button class="btn-cancel" onclick="cerrarModal()">Cerrar</button>`);
+
+  <label class="lbl">Saldo total actual (MXN) — actualiza si depositaste o retiraste</label>
+  <input class="inp-full" type="number" id="fn-saldo" value="${saldoActual}" step="0.01" oninput="previsualizarFinsus()">
+
+  <label class="lbl">Tasa anual promedio (%)</label>
+  <input class="inp-full" type="number" id="fn-tasa" value="${tasaActual}" step="0.01" oninput="previsualizarFinsus()">
+
+  <label class="lbl">Aportación mensual (MXN)</label>
+  <input class="inp-full" type="number" id="fn-aporte" value="${p.aporte||400}" step="0.01">
+
+  <!-- Preview en tiempo real -->
+  <div style="background:var(--green-d);border:1px solid var(--green)30;border-radius:10px;padding:12px;margin-bottom:14px">
+    <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Vista previa</div>
+    <div class="g2">
+      <div style="text-align:center">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:3px">Interés/mes</div>
+        <div id="fn-prev-mes" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">${fmt(iMes)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:3px">Interés/año</div>
+        <div id="fn-prev-ano" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">${fmt(iMes*12)}</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-save" onclick="saveFinsus()">Guardar</button>
+  <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
 }
-function addFinsusAport(){
-  const m=+document.getElementById('fn-m').value||0;
-  const t=+document.getElementById('fn-t').value||0;
-  const f=document.getElementById('fn-f').value;
-  const v=document.getElementById('fn-v').value;
-  if(m<=0||t<=0){toast('⚠️ Ingresa monto y tasa');return;}
-  D.finsus.aportaciones.push({fecha:f,monto:m,tasa:t,vence:v});
-  D.pilares.find(p=>p.id==='fins').saldo=totalFinsus();
+
+function previsualizarFinsus(){
+  const s=+document.getElementById('fn-saldo').value||0;
+  const t=+document.getElementById('fn-tasa').value||0;
+  const iMes=s*t/100/12;
+  const m=document.getElementById('fn-prev-mes');
+  const a=document.getElementById('fn-prev-ano');
+  if(m) m.textContent=fmt(iMes);
+  if(a) a.textContent=fmt(iMes*12);
+}
+
+function saveFinsus(){
+  const p=D.pilares.find(x=>x.id==='fins');
+  const nuevoSaldo=+document.getElementById('fn-saldo').value||0;
+  const nuevaTasa=+document.getElementById('fn-tasa').value||p.tasa;
+  const nuevoAporte=+document.getElementById('fn-aporte').value||p.aporte;
+  p.saldo=nuevoSaldo;
+  p.tasa=nuevaTasa;
+  p.aporte=nuevoAporte;
   guardar();cerrarModal();renderTab();
-}
-function delFinsusAport(i){
-  D.finsus.aportaciones.splice(i,1);
-  D.pilares.find(p=>p.id==='fins').saldo=totalFinsus();
-  guardar();renderTab();cerrarModal();editFinsus();
+  toast('✓ Finsus actualizado — '+fmt(nuevoSaldo)+' al '+nuevaTasa+'%');
 }
 
 // Cripto
