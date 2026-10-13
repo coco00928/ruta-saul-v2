@@ -141,7 +141,7 @@ select.inp-full{cursor:pointer;}
 // ══════════════════════════════════════════
 // APP VERSION
 // ══════════════════════════════════════════
-const APP_VERSION = '2026.10.05-v8';
+const APP_VERSION = '2026.10.12-fix1';
 
 // ══════════════════════════════════════════
 // DATOS BASE — Portafolio real Sep 2026
@@ -157,7 +157,7 @@ const DEF = {
   poderCompra:{efectivo:29.14, aporteSemanal:450, incluirAporte:true},
   tipoCambio: 19.50,
   ultimaActGlobal: null,
-  apiKey: 'd523898a75b84774b39755dff3e01a94',
+  apiKey: '', // La key se configura en el modal 🔑 Key y vive SOLO en localStorage. Nunca hardcodear keys en el repo.
 
   // ── SOFIPOs ──
   sofipos:[
@@ -187,7 +187,7 @@ const DEF = {
 
   // ── Cripto ──
   cripto:[
-    {t:'BTC', n:'Bitcoin', cant:0.00325665, pm:4336.62, costo:1480300, c:'#f97316', ic:'₿', cambio24h:4.49, historial:[3800,3900,4000,4100,4200,4250,4336]},
+    {t:'BTC', n:'Bitcoin', cant:0.00325665, pm:4336.62, costo:4820.82, c:'#f97316', ic:'₿', cambio24h:4.49, historial:[3800,3900,4000,4100,4200,4250,4336]},
     {t:'XRP', n:'XRP',     cant:47.158854, pm:1303.68,  costo:917.40,  c:'#346aa9', ic:'✕', cambio24h:26.78, historial:[800,900,950,1000,1100,1200,1303]},
   ],
 
@@ -229,7 +229,7 @@ const DEF = {
     {activo:'WALMEX', exDiv:'2026-11-05', pago:'2026-11-18', monto:0.58, tits:228},
     {activo:'WALMEX', exDiv:'2026-12-01', pago:'2026-12-09', monto:0.58, tits:228},
     {activo:'MSFT',   exDiv:'2026-11-20', pago:'2026-12-11', monto:0.83, tits:1},
-    {activo:'KOF',    exDiv:'2026-10-10', pago:'2026-10-20', monto:1.93, tits:10},
+    {activo:'KOF',    exDiv:'2026-10-12', pago:'2026-10-13', monto:1.935, tits:10},
   ],
   cobros:[
     {mes:'Ene 25',activo:'FMTY',    bruto:18.42,  isr:2.69},
@@ -335,7 +335,8 @@ const DEF = {
   ],
   agenda:[
     {u:'alta',  f:'Oct 2026',    ic:'📊', t:'Reporte Q3 WALMEX',         d:'Ver resultados ventas mismas tiendas y confirmar dividendo Nov'},
-    {u:'alta',  f:'18 Oct 2026', ic:'💰', t:'Dividendo KOF',              d:'$19.30 estimado (10 acc x $1.93)'},
+    {u:'alta',  f:'13 Oct 2026', ic:'💰', t:'Dividendo KOF (hoy)',        d:'$19.35 estimado (10 acc x $1.935)'},
+    {u:'media', f:'8 Dic 2026',  ic:'💰', t:'Dividendo KOF 4ta exhib',    d:'$19.35 estimado (10 acc x $1.935)'},
     {u:'media', f:'18 Nov 2026', ic:'💰', t:'Dividendo WALMEX',           d:'$132.24 estimado (228 acc x $0.58)'},
     {u:'media', f:'9 Dic 2026',  ic:'💰', t:'Dividendo WALMEX 2da exhib', d:'Segunda exhibición semestral'},
     {u:'media', f:'Nov 2026',    ic:'🗂', t:'Auditoría trimestral',       d:'Revisión completa 5 pilares — planear 2027'},
@@ -352,10 +353,23 @@ const DEF = {
 // STORAGE
 // ══════════════════════════════════════════
 function cargar(){
+  const fresh=()=>JSON.parse(JSON.stringify(DEF));
   try{
     const s=localStorage.getItem('ruta_saul_v5');
-    return s?JSON.parse(s):JSON.parse(JSON.stringify(DEF));
-  }catch(e){ return JSON.parse(JSON.stringify(DEF)); }
+    if(!s) return fresh();
+    const d=JSON.parse(s);
+    // Merge defensivo: conserva los datos del usuario y rellena campos nuevos del DEF
+    const m=Object.assign(fresh(),d);
+    if(!Array.isArray(m.cripto)) m.cripto=fresh().cripto;
+    // Migración: en versiones viejas el costo de cripto venía como precio POR UNIDAD;
+    // el modelo usa costo TOTAL (cant × precio prom). Detecta y convierte.
+    m.cripto.forEach(c=>{
+      if(c&&c.cant>0&&c.costo>c.pm*10) c.costo=+(c.costo*c.cant).toFixed(2);
+    });
+    if(typeof m.apiKey!=='string') m.apiKey='';
+    if(typeof m.tipoCambio!=='number'||!(m.tipoCambio>0)) m.tipoCambio=fresh().tipoCambio;
+    return m;
+  }catch(e){ return fresh(); }
 }
 function guardar(){ try{ localStorage.setItem('ruta_saul_v5',JSON.stringify(D)); }catch(e){} }
 let D = cargar();
@@ -450,6 +464,14 @@ function renderTab(){
 // ══════════════════════════════════════════
 // PRECIOS EN TIEMPO REAL
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// PRECIOS EN TIEMPO REAL
+// Fuente 1: TwelveData (requiere key propia en localStorage, modal 🔑 Key)
+// Fuente 2: Frankfurter (gratis, sin key) solo para el tipo de cambio USD/MXN
+// Sin key de TwelveData, acciones/fibras/cripto se editan manualmente sin romper nada.
+// (En 2026 no hay fuente gratuita sin key para acciones consultable desde el navegador:
+//  Stooq retiró su endpoint CSV y Yahoo Finance no permite CORS desde el navegador.)
+// ══════════════════════════════════════════
 async function actualizarPrecios(){
   if(actualizando) return;
   actualizando=true;
@@ -457,51 +479,78 @@ async function actualizarPrecios(){
   const btn=document.getElementById('upd-btn');
   if(ic) ic.className='spin';
   if(btn) btn.textContent='Actualizando...';
-
-  const symsGBM=D.gbm.map(a=>a.td).filter(Boolean).join(',');
-  const symsRadar=D.radar.filter(r=>r.yt).map(r=>r.yt).join(',');
-  const symsCripto='BTC/MXN,XRP/MXN,USD/MXN';
-  const allSyms=[symsGBM,symsRadar,symsCripto].filter(Boolean).join(',');
-
-  const url=`https://api.twelvedata.com/price?symbol=${encodeURIComponent(allSyms)}&apikey=${D.apiKey}`;
   let updated=0;
+  const PU={}; // clave -> "MON:precioPorUnidad"
 
-  try{
-    const r=await fetch(url,{signal:AbortSignal.timeout(12000)});
-    const j=await r.json();
-    // Respuesta: {SYMBOL:{price:"..."}} o plana si un solo símbolo
-    const getPrice=(sym)=>{
-      if(j[sym]&&j[sym].price) return parseFloat(j[sym].price);
-      if(j.price&&allSyms===sym) return parseFloat(j.price);
-      return null;
-    };
-    // Tipo de cambio
-    const tc=getPrice('USD/MXN');
-    if(tc) D.tipoCambio=tc;
-    // GBM stocks
-    D.gbm.forEach(a=>{
-      if(!a.td) return;
-      const p=getPrice(a.td);
-      if(p){ a.pm=parseFloat(p.toFixed(2)); a.ultAct=new Date().toISOString(); updated++; }
-    });
-    // Radar (en USD → los almacenamos en USD)
-    D.radar.forEach(r=>{
-      if(!r.yt) return;
-      const p=getPrice(r.yt);
-      if(p){ r.precio=parseFloat(p.toFixed(2)); updated++; }
-    });
-    // Cripto
-    const btcMXN=getPrice('BTC/MXN');
-    const xrpMXN=getPrice('XRP/MXN');
-    if(btcMXN){ D.cripto[0].pm=parseFloat(btcMXN.toFixed(2)); updated++; }
-    if(xrpMXN){ D.cripto[1].pm=parseFloat(xrpMXN.toFixed(2)); updated++; }
-
-    D.ultimaActGlobal=new Date().toISOString();
-    guardar(); renderTab();
-    toast(updated>0?`✓ ${updated} precios actualizados`:'Sin precios nuevos');
-  }catch(e){
-    toast('⚠️ Sin conexión — verifica precios manualmente en GBM');
+  // ── Fuente 1: TwelveData ──
+  if(D.apiKey){
+    try{
+      const symsGBM=D.gbm.map(a=>a.td).filter(Boolean).join(',');
+      const symsRadar=D.radar.filter(r=>r.yt).map(r=>r.yt).join(',');
+      const allSyms=[symsGBM,symsRadar,'BTC/MXN','XRP/MXN','USD/MXN'].filter(Boolean).join(',');
+      const r=await fetch(`https://api.twelvedata.com/price?symbol=${encodeURIComponent(allSyms)}&apikey=${D.apiKey}`,{signal:AbortSignal.timeout(12000)});
+      const j=await r.json();
+      // Respuesta: {SYMBOL:{price:"..."}} o plana si un solo símbolo
+      const getP=(sym)=>{
+        if(j[sym]&&j[sym].price) return parseFloat(j[sym].price);
+        if(j.price&&allSyms===sym) return parseFloat(j.price);
+        return null;
+      };
+      D.gbm.forEach(a=>{ const p=a.td&&getP(a.td); if(p) PU['gbm:'+a.t]='MXN:'+p; });
+      D.radar.forEach(rr=>{ const p=rr.yt&&getP(rr.yt); if(p) PU['radar:'+rr.t]='USD:'+p; });
+      const tc=getP('USD/MXN'); if(tc) PU['fx']='MXN:'+tc;
+      const btc=getP('BTC/MXN'); if(btc) PU['cripto:BTC']='MXN:'+btc;
+      const xrp=getP('XRP/MXN'); if(xrp) PU['cripto:XRP']='MXN:'+xrp;
+    }catch(e){ /* cae al respaldo */ }
   }
+
+  // ── Fuente 2: Frankfurter (gratis, sin key) para el tipo de cambio USD/MXN ──
+  try{
+    if(!PU['fx']){
+      const r=await fetch('https://api.frankfurter.dev/v1/latest?from=USD&to=MXN',{signal:AbortSignal.timeout(10000)});
+      const j=await r.json();
+      const fx=j&&j.rates&&j.rates.MXN;
+      if(fx&&fx>0) PU['fx']='MXN:'+fx;
+    }
+  }catch(e){ /* sin red: se conserva el tipo de cambio manual */ }
+
+  // ── Aplicar ──
+  const fxV=PU['fx']?parseFloat(PU['fx'].split(':')[1]):null;
+  if(fxV&&fxV>0) D.tipoCambio=fxV;
+  const usdMxn=(fxV&&fxV>0)?fxV:(D.tipoCambio||19.5);
+  // GBM: BMV viene en MXN; símbolos EEUU (td sin ':BMV') vienen en USD → convertir
+  D.gbm.forEach(a=>{
+    const v=PU['gbm:'+a.t];
+    if(v){
+      const parts=v.split(':');
+      let px=parseFloat(parts[1]);
+      if(a.td&&!a.td.includes(':')) px=px*usdMxn;
+      a.pm=parseFloat(px.toFixed(2)); a.ultAct=new Date().toISOString(); updated++;
+    }
+  });
+  // Radar: se almacena en USD
+  D.radar.forEach(rr=>{
+    const v=PU['radar:'+rr.t];
+    if(v){ rr.precio=parseFloat(parseFloat(v.split(':')[1]).toFixed(2)); updated++; }
+  });
+  // Cripto: pm es el VALOR TOTAL de la posición (precio unidad × cantidad)
+  ['BTC','XRP'].forEach(sym=>{
+    const c=D.cripto.find(x=>x.t===sym);
+    const v=PU['cripto:'+sym];
+    if(c&&v){
+      const parts=v.split(':'), pxU=parseFloat(parts[1]);
+      const pxMXN=parts[0]==='USD'?pxU*usdMxn:pxU;
+      c.pm=+(pxMXN*c.cant).toFixed(2);
+      if(!c.historial) c.historial=[];
+      c.historial.push(c.pm);
+      if(c.historial.length>10) c.historial.shift();
+      updated++;
+    }
+  });
+
+  D.ultimaActGlobal=new Date().toISOString();
+  guardar(); renderTab();
+  toast(updated>0?`✓ ${updated} precios actualizados`:'Sin precios nuevos');
   actualizando=false;
 }
 
@@ -607,14 +656,13 @@ function tplGeneral(){
   const finsTasa=finsPilar.tasa||10;
   const finsIntMes=finsTotal*finsTasa/100/12;
 
-  // Cripto cards
+  // Cripto cards — costo es COSTO TOTAL (cant × precio prom); gan = pm - costo
   const criptoH=D.cripto.map((c,i)=>{
-    const ganTotal=c.pm-c.costo/1e6*c.pm; // simplificado
-    const ganPct=((c.pm-c.costo*c.cant/c.pm)/c.pm)*100; // aproximado
-    const realGan=c.pm-c.costo; // valor actual vs costo total
-    const ganReal=((c.pm/(c.costo||1))-1)*100;
+    const costoT=c.costo||0;
+    const gan=c.pm-costoT;
+    const ganPct=costoT>0?(gan/costoT*100):0;
     const subiendo=c.cambio24h>=0;
-    const spark=sparkline(c.historial,c.color);
+    const spark=sparkline(c.historial,c.c);
     return `<div class="sofi-card" style="cursor:pointer" onclick="editCripto(${i})">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:8px">
@@ -628,6 +676,7 @@ function tplGeneral(){
           ${spark}
           <div style="text-align:right">
             <div style="font-family:var(--mono);font-size:14px;font-weight:700">${fmt(c.pm)}</div>
+            <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:${gan>=0?'var(--green)':'var(--red)'}">${gan>=0?'+':'-'}${fmt(gan)} (${ganPct.toFixed(2)}%)</div>
             <div style="font-size:10px;color:${subiendo?'var(--green)':'var(--red)'};font-weight:600">${subiendo?'▲':'▼'} ${Math.abs(c.cambio24h).toFixed(2)}% 24h</div>
           </div>
         </div>
@@ -657,6 +706,11 @@ function tplGeneral(){
         <div style="font-size:12px;color:var(--muted2);line-height:1.6;font-style:italic">"${fraseDeLaSemana()}"</div>
       </div>
     </div>
+  </div>
+
+  <div class="card" style="display:flex;gap:8px;padding:10px">
+    <button class="btn-save" style="flex:1;margin:0;padding:11px" onclick="exportarRespaldo()">💾 Exportar respaldo</button>
+    <label style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text)">📥 Importar<input type="file" accept=".json,application/json" style="display:none" onchange="importarRespaldo(this)"></label>
   </div>
 
   <div class="sec">Distribución de Pilares <span style="font-size:8px;color:var(--muted)">(toca para editar)</span></div>
@@ -791,6 +845,9 @@ function tplGBM(){
   <div style="background:var(--yellow-d);border:1px solid #f0b42930;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted2);line-height:1.5">
     ⚠️ Verifica precios en GBM antes de ejecutar órdenes reales.
   </div>
+  ${!D.apiKey?`<div style="background:var(--blue-d);border:1px solid #3d9cf030;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted2);line-height:1.5">
+    🔑 Sin API key: los precios se capturan manualmente. Toca <strong style="color:var(--blue)">🔑 Key</strong> para poner la tuya (gratis en twelvedata.com, 800 consultas/día) y el botón <strong>⟳ Actualizar</strong> traerá los precios solo.
+  </div>`:''}
   <div class="card card-tap" onclick="editPoderCompra()" style="background:linear-gradient(135deg,#0a2436,#0d1420);border-color:var(--green)40;margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">💵 Poder de Compra</div>
@@ -816,20 +873,26 @@ function tplGBM(){
 // TAB DIVIDENDOS
 // ══════════════════════════════════════════
 function tplDivs(){
-  const avisosH=D.avisos.map((a,i)=>`<tr>
+  const avisosH=D.avisos.map((a,i)=>{
+    // Si el activo es una posición Global (ej: MSFT), el monto viene en USD → convertir a MXN
+    const gPos=D.gbm.find(x=>x.t===a.activo);
+    const esUSD=(gPos&&gPos.g==='Global');
+    const totalEst=a.monto*a.tits*(esUSD?(D.tipoCambio||1):1);
+    return `<tr>
     <td style="font-family:var(--mono);font-weight:700">${a.activo}</td>
     <td><input class="inp inp-lg" type="date" value="${a.exDiv}" onchange="updAviso(${i},'exDiv',this.value)"></td>
     <td><input class="inp inp-lg" type="date" value="${a.pago}" onchange="updAviso(${i},'pago',this.value)"></td>
     <td><input class="inp inp-md" type="number" step="0.001" value="${a.monto}" onchange="updAviso(${i},'monto',this.value)"></td>
     <td><input class="inp inp-sm" type="number" value="${a.tits}" onchange="updAviso(${i},'tits',this.value)"></td>
-    <td style="font-family:var(--mono);color:var(--green);font-weight:700">${fmt(a.monto*a.tits)}</td>
+    <td style="font-family:var(--mono);color:var(--green);font-weight:700">${fmt(totalEst)}${esUSD?'<div style="font-size:8px;color:var(--muted);font-weight:400">USD→MXN</div>':''}</td>
     <td><button class="btn-del" onclick="delAviso(${i})"><i class="fa fa-trash"></i></button></td>
-  </tr>`).join('');
+  </tr>`;}).join('');
 
-  // Agrupar por año — 25→2025, 26→2026, sino "Otro"
+  // Agrupar por año — extrae los últimos 2 dígitos del campo mes (ej: 'Ene 25' → 2025)
   const porAno={};
   D.cobros.forEach((c,i)=>{
-    const ano=c.mes.includes('25')?'2025':c.mes.includes('26')?'2026':'Otro';
+    const mAno=String(c.mes||'').match(/\b(\d{2})\s*$/);
+    const ano=mAno?('20'+mAno[1]):'Otro';
     if(!porAno[ano]) porAno[ano]=[];
     porAno[ano].push({...c,idx:i});
   });
@@ -937,6 +1000,53 @@ function toggleAno(ano){
 // ══════════════════════════════════════════
 // TAB RADAR — con análisis de mercado
 // ══════════════════════════════════════════
+// Análisis del portafolio generado desde datos REALES (nada hardcodeado)
+function buildNoticias(){
+  const N=[];
+  const gbmT=t=>D.gbm.find(a=>a.t===t);
+  const w=gbmT('WALMEX');
+  if(w&&w.pp>0){
+    const p=(w.pm-w.pp)/w.pp*100;
+    N.push({ic:'📊',t:'WALMEX — '+(p>=0?'En verde':'Acumulando en zona baja'),
+      txt:`Con ${w.tits} acciones a costo prom ${fmt(w.pp)} y precio actual ${fmt(w.pm)}, llevas ${pct(p)}. Reporte Q3 en octubre y dividendo de noviembre como catalizadores próximos.`,
+      color:p>=0?'var(--green)':'var(--blue)'});
+  }
+  const m=gbmT('MSFT');
+  if(m&&m.pp>0){
+    const p=(m.pm-m.pp)/m.pp*100;
+    N.push({ic:'📈',t:'MSFT — '+(p>=0?'Recuperación sólida':'Bajo costo promedio'),
+      txt:`Tu posición pasó de ${fmt(m.pp)} a ${fmt(m.pm)} — un ${pct(p)}. Tesis de largo plazo en tecnología.`,
+      color:p>=0?'var(--green)':'var(--red)'});
+  }
+  const g=D.radar.find(r=>r.t==='GOOGL');
+  if(g){
+    const enZ=g.precio<=g.zMax;
+    const dist=((g.precio-g.zMax)/g.precio*100).toFixed(1);
+    N.push({ic:'🎯',t:'GOOGL — '+(enZ?'En zona de entrada':'Cerca de zona de entrada'),
+      txt:`Cotiza en $${g.precio} USD. Tu zona ideal es $${g.zMin}-${g.zMax}. `+(enZ?'¡Entró a tu zona! Evalúa tu entrada.':`Está a ${dist}% de la zona; espera corrección para entrar.`),
+      color:enZ?'var(--green)':'var(--yellow)'});
+  }
+  const btc=D.cripto.find(c=>c.t==='BTC');
+  if(btc){
+    const ct=btc.costo||0, gan=btc.pm-ct, gp=ct>0?gan/ct*100:0;
+    N.push({ic:'₿',t:'BTC — Posición '+(gp>=0?'en verde':'en rojo'),
+      txt:`Tu posición de ${btc.cant} BTC vale ${fmt(btc.pm)} (${pct(gp)} vs costo total ${fmt(ct)}). Continúa DCA semanal.`,
+      color:'var(--orange)'});
+  }
+  const n=gbmT('NFLX');
+  if(n&&n.pp>0){
+    const p=(n.pm-n.pp)/n.pp*100;
+    N.push({ic:'🔴',t:'NFLX — '+(p>=0?'En verde':'Sigue bajo costo promedio'),
+      txt:`Con ${n.tits} acciones a ${fmt(n.pp)} costo prom y precio ${fmt(n.pm)}, llevas ${pct(p)}.`,
+      color:p>=0?'var(--green)':'var(--red)'});
+  }
+  const intMes=D.sofipos.reduce((s,x)=>s+(x.saldo*x.tasa/100/12),0);
+  N.push({ic:'💰',t:`SOFIPOs — ${fmt(intMes)} al mes en intereses`,
+    txt:`${D.sofipos.map(s=>`${s.n} al ${s.tasa}%`).join(' · ')} generan ingreso pasivo mensual sin riesgo de mercado.`,
+    color:'var(--green)'});
+  return N;
+}
+
 function tplRadar(){
   const tc=D.tipoCambio;
 
@@ -945,6 +1055,7 @@ function tplRadar(){
     const casiZona=r.precio<=(r.zMax*1.08);
     const dist=((r.precio-r.zMax)/r.precio*100).toFixed(1);
     const fill=Math.min(100,Math.max(5,((r.precio-r.zMin*0.85)/(r.obj-r.zMin*0.85))*100));
+    const pot=r.precio>0?((r.obj-r.precio)/r.precio*100):0; // potencial siempre calculado, nunca desfasado
     const pMXN=(r.precio*tc).toLocaleString('es-MX',{maximumFractionDigits:0});
     const zMinMXN=(r.zMin*tc).toLocaleString('es-MX',{maximumFractionDigits:0});
     const zMaxMXN=(r.zMax*tc).toLocaleString('es-MX',{maximumFractionDigits:0});
@@ -966,7 +1077,7 @@ function tplRadar(){
         </div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:3px">
-        <span>Zona: $${r.zMin}–$${r.zMax} USD</span><span>Objetivo: $${r.obj} (+${r.pot}%)</span>
+        <span>Zona: $${r.zMin}–$${r.zMax} USD</span><span>Objetivo: $${r.obj} (+${pot.toFixed(0)}%)</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--blue);margin-bottom:5px">
         <span>≈ $${zMinMXN}–$${zMaxMXN} MXN</span><span>≈ $${objMXN} MXN</span>
@@ -977,15 +1088,8 @@ function tplRadar(){
     </div>`;
   }).join('');
 
-  // Noticias dinámicas generadas desde el portafolio
-  const noticias=[
-    {ic:'📊',t:'WALMEX — Acumulando en zona baja',txt:`Con 228 acciones a costo prom $53.83 y precio actual ~$46, tienes -12% pero con el reporte Q3 en octubre y dividendo de noviembre ($132 estimado) como catalizadores próximos.`,color:'var(--blue)'},
-    {ic:'📈',t:'MSFT — Recuperación sólida',txt:`Tu única acción de Microsoft pasó de $6,650 a $8,554 — un +28.65%. El precio objetivo de analistas es $576 USD. Buena tesis de largo plazo validada.`,color:'var(--green)'},
-    {ic:'🎯',t:'GOOGL — Cerca de zona de entrada',txt:`Cotiza cerca de $178 USD. Tu zona ideal es $160-175. Podrías estar a pocas semanas de una oportunidad real si el mercado corrige.`,color:'var(--yellow)'},
-    {ic:'₿',t:'BTC — Recuperación +4.49% hoy',txt:`Bitcoin subió hoy. Tu posición de 0.00325665 BTC vale $4,336 MXN con ganancia histórica neta en proceso. Continúa DCA semanal.`,color:'var(--orange)'},
-    {ic:'🔴',t:'NFLX — Sigue bajo costo promedio',txt:`Con 5 acciones a $1,561 costo prom y precio ~$1,294, llevas -17%. Los fundamentales siguen sólidos. No vender, esperar recuperación.`,color:'var(--red)'},
-    {ic:'💰',t:'SOFIPOs — $${fmt(D.sofipos.reduce((s,x)=>s+(x.saldo*x.tasa/100/12),0))} al mes en intereses',txt:`Nu Cajita Turbo al 13% y DiDi al 15% generan ingreso pasivo mensual constante sin riesgo de mercado.`,color:'var(--green)'},
-  ];
+  // Análisis generado dinámicamente desde el portafolio real
+  const noticias=buildNoticias();
 
   const noticiasH=noticias.map(n=>`
     <div class="noticia-card">
@@ -1053,10 +1157,15 @@ function tplAgenda(){
 function abrirModal(html){document.getElementById('modal-body').innerHTML=html;document.getElementById('modal').classList.add('open');}
 function cerrarModal(){document.getElementById('modal').classList.remove('open');}
 
+// Pilares cuyo saldo se CALCULA solo (gbm, sofi, bitso): el campo de saldo se oculta
+const PILARES_CALCULADOS=['gbm','sofi','bitso'];
 function editPilar(id){
   const p=D.pilares.find(x=>x.id===id);
+  const calculado=PILARES_CALCULADOS.includes(id);
   abrirModal(`<div class="modal-title">${p.ic} ${p.n} <button class="modal-close" onclick="cerrarModal()">✕</button></div>
-  <label class="lbl">Saldo actual (MXN)</label><input class="inp-full" type="number" id="ep-s" value="${p.saldo}">
+  ${calculado
+    ?`<div style="background:var(--blue-d);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:var(--muted2)">ℹ️ El saldo de este pilar se calcula automáticamente desde su sección (GBM, SOFIPOs o Cripto). Edítalo ahí.</div>`
+    :`<label class="lbl">Saldo actual (MXN)</label><input class="inp-full" type="number" id="ep-s" value="${p.saldo}">`}
   <label class="lbl">Aportación mensual (MXN)</label><input class="inp-full" type="number" id="ep-a" value="${p.aporte}">
   ${p.tasa?`<label class="lbl">Tasa anual (%)</label><input class="inp-full" type="number" id="ep-t" value="${p.tasa}" step="0.01">`:''}
   <button class="btn-save" onclick="savePilar('${id}')">Guardar</button>
@@ -1064,7 +1173,8 @@ function editPilar(id){
 }
 function savePilar(id){
   const p=D.pilares.find(x=>x.id===id);
-  p.saldo=+document.getElementById('ep-s').value||p.saldo;
+  const epS=document.getElementById('ep-s');
+  if(epS) p.saldo=+epS.value||p.saldo;
   p.aporte=+document.getElementById('ep-a').value||p.aporte;
   const t=document.getElementById('ep-t');
   if(t) p.tasa=+t.value||p.tasa;
@@ -1378,12 +1488,13 @@ function addCobro(){D.cobros.push({mes:'Sep 26',activo:'',bruto:0,isr:0});guarda
 
 function editRadar(i){
   const r=D.radar[i];
+  const potCalc=r.precio>0?(((r.obj-r.precio)/r.precio*100).toFixed(1)):0;
   abrirModal(`<div class="modal-title">📡 ${r.t} <button class="modal-close" onclick="cerrarModal()">✕</button></div>
   <label class="lbl">Precio actual (USD)</label><input class="inp-full" type="number" id="er-p" value="${r.precio}" step="0.01">
   <label class="lbl">Zona mínima compra (USD)</label><input class="inp-full" type="number" id="er-mn" value="${r.zMin}" step="0.01">
   <label class="lbl">Zona máxima compra (USD)</label><input class="inp-full" type="number" id="er-mx" value="${r.zMax}" step="0.01">
   <label class="lbl">Precio objetivo (USD)</label><input class="inp-full" type="number" id="er-o" value="${r.obj}" step="0.01">
-  <label class="lbl">Potencial estimado (%)</label><input class="inp-full" type="number" id="er-pot" value="${r.pot}" step="0.1">
+  <label class="lbl">Potencial estimado (%) — se calcula solo</label><input class="inp-full" type="number" id="er-pot" value="${potCalc}" step="0.1" disabled>
   <button class="btn-save" onclick="saveRadar(${i})">Guardar</button>
   <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
 }
@@ -1392,7 +1503,8 @@ function saveRadar(i){
   D.radar[i].zMin=+document.getElementById('er-mn').value||D.radar[i].zMin;
   D.radar[i].zMax=+document.getElementById('er-mx').value||D.radar[i].zMax;
   D.radar[i].obj=+document.getElementById('er-o').value||D.radar[i].obj;
-  D.radar[i].pot=+document.getElementById('er-pot').value||D.radar[i].pot;
+  // El potencial siempre se recalcula: (objetivo-precio)/precio
+  D.radar[i].pot=D.radar[i].precio>0?+(((D.radar[i].obj-D.radar[i].precio)/D.radar[i].precio*100).toFixed(1)):0;
   guardar();cerrarModal();renderTab();
 }
 function addRadar(){
@@ -1403,14 +1515,44 @@ function addRadar(){
   <label class="lbl">Zona mínima</label><input class="inp-full" type="number" id="ar-mn" step="0.01">
   <label class="lbl">Zona máxima</label><input class="inp-full" type="number" id="ar-mx" step="0.01">
   <label class="lbl">Precio objetivo</label><input class="inp-full" type="number" id="ar-o" step="0.01">
-  <label class="lbl">Potencial %</label><input class="inp-full" type="number" id="ar-pot" step="0.1">
   <label class="lbl">Ticker Yahoo (ej: GOOGL)</label><input class="inp-full" type="text" id="ar-yt">
   <button class="btn-save" onclick="saveAddRadar()">Agregar</button>
   <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>`);
 }
 function saveAddRadar(){
-  D.radar.push({t:document.getElementById('ar-t').value.toUpperCase(),n:document.getElementById('ar-n').value,precio:+document.getElementById('ar-p').value||0,zMin:+document.getElementById('ar-mn').value||0,zMax:+document.getElementById('ar-mx').value||0,obj:+document.getElementById('ar-o').value||0,pot:+document.getElementById('ar-pot').value||0,mon:'USD',yt:document.getElementById('ar-yt').value});
+  const _p=+document.getElementById('ar-p').value||0, _o=+document.getElementById('ar-o').value||0;
+  D.radar.push({t:document.getElementById('ar-t').value.toUpperCase(),n:document.getElementById('ar-n').value,precio:_p,zMin:+document.getElementById('ar-mn').value||0,zMax:+document.getElementById('ar-mx').value||0,obj:_o,pot:_p>0?+(((_o-_p)/_p*100).toFixed(1)):0,mon:'USD',yt:document.getElementById('ar-yt').value});
   guardar();cerrarModal();renderTab();
+}
+
+// ══════════════════════════════════════════
+// RESPALDO — Exportar / Importar estado (JSON)
+// ══════════════════════════════════════════
+function exportarRespaldo(){
+  try{
+    const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='ruta-saul-respaldo-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    toast('✓ Respaldo descargado');
+  }catch(e){ toast('⚠️ No se pudo exportar'); }
+}
+function importarRespaldo(input){
+  const f=input.files&&input.files[0];
+  if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d||!Array.isArray(d.pilares)||!Array.isArray(d.gbm)) throw new Error('formato inválido');
+      D=d; guardar(); renderTab();
+      toast('✓ Respaldo restaurado');
+    }catch(e){ toast('⚠️ Archivo inválido — no se cambió nada'); }
+  };
+  r.readAsText(f);
+  input.value='';
 }
 
 // ══════════════════════════════════════════
@@ -1429,7 +1571,13 @@ renderTab();
 if(navigator.userAgent.includes('Safari')&&!navigator.userAgent.includes('Chrome')&&!window.navigator.standalone){
   setTimeout(()=>toast('Toca Compartir → "Añadir a pantalla de inicio"'),2000);
 }
-setInterval(()=>{if(!document.hidden&&tab==='gbm')actualizarPrecios();},5*60*1000);
+// Auto-refresh moderado: solo al volver a la pestaña GBM y con mínimo 30 min
+// desde la última actualización (la cuota gratuita de TwelveData es 800/día)
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden||tab!=='gbm') return;
+  const last=D.ultimaActGlobal?new Date(D.ultimaActGlobal).getTime():0;
+  if(Date.now()-last>30*60*1000) actualizarPrecios();
+});
 </script>
 </body>
 </html>
